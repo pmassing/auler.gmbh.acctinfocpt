@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: AccountinfoCockpit
+Bundle-SymbolicName: de.aulerlichtkabel.acctinfocpt;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Require-Bundle: org.adempiere.base;bundle-version="3.1.0",
+ org.adempiere.plugin.utils;bundle-version="3.1.0",
+ org.adempiere.ui.zk;bundle-version="3.1.0",
+ org.zkoss.zk.library
+Service-Component: OSGI-INF/pat_formfactory.xml
+Import-Package: org.zkoss.zk.ui.event,
+ org.zkoss.zul
+Bundle-Vendor: Patric Maßing (Hans Auler GmbH)
+Export-Package: de.aulerlichtkabel.acctinfocpt.component,
+ de.aulerlichtkabel.acctinfocpt.froms
+Bundle-ActivationPolicy: lazy
+Bundle-Activator: org.adempiere.plugin.utils.Incremental2PackActivator
