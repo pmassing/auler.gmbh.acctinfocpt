@@ -38,6 +38,7 @@ import org.adempiere.webui.component.Listbox;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.panel.InfoPanel;
 import org.compiere.model.MAcctSchema;
+import org.compiere.model.MColumn;
 import org.compiere.model.MElementValue;
 import org.compiere.model.MOrg;
 import org.compiere.model.MTable;
@@ -85,12 +86,12 @@ public class PAT_Data {
 		}
 	}
 
-	public void getDocument(int windowNo, String tableName, final Label label, final Listbox box) {
+	public void getDocument(int windowNo, String tableName, Label label, Listbox box) {
 
 		docID = 0;
 		docTableName.delete(0, docTableName.length());
 
-		final MTable table = new MTable(Env.getCtx(), new Integer((String)box.getSelectedItem().getValue()), null);
+		MTable table = new MTable(Env.getCtx(), new Integer(box.getSelectedItem().getValue()), null);
 
 		hasDocnoCol = false;
 		if(table.getColumn("DocumentNo") != null)
@@ -108,7 +109,6 @@ public class PAT_Data {
 			}
 
 			info.setVisible(true);
-			
 			info.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
 				@Override
 				public void onEvent(Event event) throws Exception {
@@ -130,8 +130,6 @@ public class PAT_Data {
 				}
 			});
 			AEnv.showWindow(info);
-			
-			
 		}
 	}
 
