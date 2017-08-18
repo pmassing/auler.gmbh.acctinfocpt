@@ -22,6 +22,7 @@
 
 package de.aulerlichtkabel.acctinfocpt.froms;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -38,7 +39,6 @@ import org.adempiere.webui.component.Listbox;
 import org.adempiere.webui.event.DialogEvents;
 import org.adempiere.webui.panel.InfoPanel;
 import org.compiere.model.MAcctSchema;
-import org.compiere.model.MColumn;
 import org.compiere.model.MElementValue;
 import org.compiere.model.MOrg;
 import org.compiere.model.MTable;
@@ -330,12 +330,21 @@ public class PAT_Data {
 				else
 					row.add("");
 
-				// DateAcct
-				if (rs.getTimestamp(9) != null)
-					row.add(dateFormat.format(rs.getTimestamp(9)));
-				else
-					row.add("");
+				// DateAcct or Balance Carried Forward
+				if (rs.getObject(9) instanceof Timestamp)
+					if (rs.getTimestamp(9) != null)
+						row.add(dateFormat.format(rs.getTimestamp(9)));
+					else
+						row.add("");
+				
+				if (rs.getObject(9) instanceof BigDecimal)
+					if (rs.getBigDecimal(9) != null)
+						row.add(numberFormat.format(rs.getBigDecimal(9)));
+					else
+						row.add("");
 
+				// <== DateAcct or Balance Carried Forward
+ 				
 				// Debit
 				if (rs.getBigDecimal(10) != null)
 					row.add(numberFormat.format(rs.getBigDecimal(10)));
@@ -351,11 +360,22 @@ public class PAT_Data {
 					row.add(numberFormat.format(rs.getBigDecimal(12)));
 				else
 					row.add("");
-				// Product
-				if (rs.getString(13) != null)
-					row.add(rs.getString(13));
-				else
-					row.add("");
+				
+				// Product or Ending Balance
+				if (rs.getObject(13) instanceof String)				
+					if (rs.getString(13) != null)
+						row.add(rs.getString(13));
+					else
+						row.add("");
+				
+				if (rs.getObject(13) instanceof BigDecimal)				
+					if (rs.getBigDecimal(13) != null)
+						row.add(rs.getBigDecimal(13));
+					else
+						row.add("");
+				// <== Product or Ending Balance
+
+				
 				// BPartner
 				if (rs.getString(17) != null)
 					row.add(rs.getString(17));

@@ -22,10 +22,19 @@
 
 package de.aulerlichtkabel.acctinfocpt.froms;
 
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+
+import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 
 public class PAT_Sqls {
 
+	
+	private SimpleDateFormat dateFormat = DisplayType.getDateFormat(DisplayType.Date);
+	
+	
 	public PAT_Sqls() {
 		super();
 	}
@@ -602,5 +611,52 @@ public class PAT_Sqls {
 				+ "group by " + "row");
 
 	}
+	
 
+
+	public StringBuilder getSqlBalanceOfAccountsList(Timestamp dateFrom, Timestamp dateTo) {
+
+		
+		return new StringBuilder()
+		
+				.append("select "
+						+ "null as row, " 
+						+ "null as fact_acct_id, " 
+						+ "(select name from ad_client where ad_client_id=f.ad_client_id) as clientname, "
+						+ "(select name from ad_org where ad_org_id =f.ad_org_id) as orgname, "
+						+ "account_id, " 
+						+ " (select value from c_elementvalue where c_elementvalue_id=f.account_id) as value,"
+						+ " (select name from c_elementvalue where c_elementvalue_id=f.account_id) as name,"
+						+ "null as datetrx," 
+						+ " (select sum(amtacctdr-amtacctcr) from fact_acct f2 where f2.dateacct < " + "'" + dateFormat.format(dateFrom)  + "'" + " and f2.account_id=f.account_id)::numeric as balance_carried_forward,"
+						+ " (select sum(f2.amtacctdr) from fact_acct f2 where f2.dateacct between  " + "'" + dateFormat.format(dateFrom)  + "'" + " and  " + "'" + dateFormat.format(dateTo)  + "'" + " and f2.account_id=f.account_id)::numeric as debit,"
+						+ " (select sum(f2.amtacctcr) from fact_acct f2 where f2.dateacct between  " + "'" + dateFormat.format(dateFrom)  + "'" + " and  " + "'" + dateFormat.format(dateTo)  + "'" + " and f2.account_id=f.account_id)::numeric as credit,"
+						+ " (select sum(f2.amtacctdr-f2.amtacctcr) from fact_acct f2 where f2.dateacct between  " + "'" + dateFormat.format(dateFrom)  + "'" + " and  " + "'" + dateFormat.format(dateTo)  + "'" + " and f2.account_id=f.account_id)::numeric as current_balance,"
+						+ " (select sum(f2.amtacctdr-f2.amtacctcr) from fact_acct f2 where f2.dateacct <=  " + "'" + dateFormat.format(dateTo)  + "'" + " and f2.account_id=f.account_id)::numeric as end_balance,"
+						+ "null as product_description, "
+						+ "null as project_value, " 
+						+ "null as project_description, "
+						+ "null as bpartner_value, " 
+						+ "null as bpartner_description, "
+						+ "null as salesregion, " 
+						+ "null as tablename, " 
+						+ "null as record_id "
+						
+						+ " from fact_acct f"
+
+						+ " where f.account_id in (select f2.account_id from fact_acct f2 where f2.ad_client_id = " + Env.getAD_Client_ID(Env.getCtx()) + " group by f2.account_id)"
+
+						+ " and f.dateacct between ? and ? "
+
+						+ " and f.ad_client_id = (select ad_client_id from ad_client where name= ? )"
+
+						+ " and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "
+						
+						+ " and c_acctschema_id = ? "
+
+						+ " group by account_id, ad_client_id, ad_org_id "
+						
+						+ " order by (select value from c_elementvalue where c_elementvalue_id=f.account_id)");
+		
+	}
 }

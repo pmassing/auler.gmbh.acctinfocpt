@@ -109,6 +109,7 @@ public class PAT_WAcctInfCptForm
 	private ToolBarButton tButtonAccountsOverView = new ToolBarButton();
 	private ToolBarButton tButtonSummaryDocument = new ToolBarButton();
 	private ToolBarButton tButtonSummary = new ToolBarButton();
+	private ToolBarButton tBalanceOfAccountsList = new ToolBarButton();
 
 	Vbox vBox = new Vbox();
 
@@ -197,7 +198,8 @@ public class PAT_WAcctInfCptForm
 	private boolean isAccountOverView = false;
 	private boolean isSummaryDocument = false;
 	private boolean isSummary = false;
-
+	private boolean isBalanceOfAccountsList = false;
+	
 	Map<String, Object> params = new HashMap<String, Object>();
 
 	/** Logger */
@@ -295,12 +297,17 @@ public class PAT_WAcctInfCptForm
 
 		tButtonSummary.setImage(ThemeManager.getThemeResource("images/Summary24.png"));
 		tButtonSummary.addEventListener(Events.ON_CLICK, this);
-
+		
+		tBalanceOfAccountsList.setImage(ThemeManager.getThemeResource("images/Report24.png"));
+		tBalanceOfAccountsList.addEventListener(Events.ON_CLICK, this);
+		
+		
 		toolBar.appendChild(tButtonAccountCourse);
 		toolBar.appendChild(tButtonAccountsOverView);
 		toolBar.appendChild(tButtonAccountOverView);
 		toolBar.appendChild(tButtonSummaryDocument);
 		toolBar.appendChild(tButtonSummary);
+		toolBar.appendChild(tBalanceOfAccountsList);
 
 		return toolBar;
 	}
@@ -654,6 +661,27 @@ public class PAT_WAcctInfCptForm
 					e.printStackTrace();
 				}
 			}
+			
+			if(isBalanceOfAccountsList){
+				
+				// In this case balance_carried_forward, debit, credit, current_balance, ending_balance
+				if (c >= 5 && c <= 9) {
+					
+					if((cell.getValue() != null) && (c==5 || c==9))
+						cell.setValue(numberFormat.format(cell.getValue()));
+
+					try {
+
+						if (numberFormat.parse(o.toString()).floatValue() < 0)
+							cell.setStyle("color:red;font-weight: bold;text-align: right");
+						else
+							cell.setStyle("font-weight: bold;text-align: right");
+
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
+				}
+			}			
 
 			item.appendChild(cell);
 			c++;
@@ -709,6 +737,7 @@ public class PAT_WAcctInfCptForm
 			isAccountOverView = false;
 			isSummaryDocument = false;
 			isSummary = false;
+			isBalanceOfAccountsList = false;
 
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(true);
@@ -739,6 +768,7 @@ public class PAT_WAcctInfCptForm
 			isAccountOverView = false;
 			isSummaryDocument = false;
 			isSummary = false;
+			isBalanceOfAccountsList = false;
 
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(true);
@@ -769,6 +799,7 @@ public class PAT_WAcctInfCptForm
 			isAccountOverView = true;
 			isSummaryDocument = false;
 			isSummary = false;
+			isBalanceOfAccountsList = false;
 
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(true);
@@ -799,6 +830,7 @@ public class PAT_WAcctInfCptForm
 			isAccountOverView = false;
 			isSummaryDocument = true;
 			isSummary = false;
+			isBalanceOfAccountsList = false;
 
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(false);
@@ -830,6 +862,7 @@ public class PAT_WAcctInfCptForm
 			isAccountOverView = false;
 			isSummaryDocument = false;
 			isSummary = true;
+			isBalanceOfAccountsList = false;
 
 			rowCheckbox.setVisible(true);
 			rowClientAndOrg.setVisible(true);
@@ -848,6 +881,41 @@ public class PAT_WAcctInfCptForm
 					+ Msg.getMsg(Env.getCtx(), "Summary").replaceAll("[&]", ""));
 
 		}
+		
+		
+		if (event.getTarget() == tBalanceOfAccountsList) {
+
+			clearParameters();
+			clearList();
+			refreshHeader();
+			
+			setCheckboxOnYear();
+
+			isAccountCourse = false;
+			isAccountsOverView = false;
+			isAccountOverView = false;
+			isSummaryDocument = false;
+			isSummary = false;
+			isBalanceOfAccountsList = true;
+
+			rowCheckbox.setVisible(false);
+			rowClientAndOrg.setVisible(true);
+			rowAcctSchema.setVisible(true);
+			rowAccountDocument.setVisible(false);
+			rowAcctValue.setVisible(false);
+			rowDate.setVisible(true);
+			rowDimension.setVisible(false);
+			rowDimension2.setVisible(false);
+
+			tabBox.setSelectedIndex(0);
+
+			tabResult.setLabel(Msg.getMsg(Env.getCtx(), "Result").replaceAll("[&]", "") + " - "
+					+ Msg.getMsg(Env.getCtx(), "BalanceOfAccountsList").replaceAll("[&]", ""));
+			tabParameter.setLabel(Msg.getMsg(Env.getCtx(), "Query").replaceAll("[&]", "") + " - "
+					+ Msg.getMsg(Env.getCtx(), "BalanceOfAccountsList").replaceAll("[&]", ""));
+
+		}
+		
 
 		if (event.getTarget() == checkboxOnYear) {
 			setCheckboxOnYear();
@@ -889,6 +957,10 @@ public class PAT_WAcctInfCptForm
 			if (isAccountOverView) {
 
 				accountOverView();
+			}
+			
+			if (isBalanceOfAccountsList){
+				BalanceOfAccountsList();
 			}
 
 			tabBox.setSelectedIndex(1);
@@ -1231,6 +1303,56 @@ public class PAT_WAcctInfCptForm
 		}
 
 	}
+	
+	
+	private void BalanceOfAccountsList() {
+		//balance_carried_forward, debit, credit, current_balance, ending_balance
+		setLabelOfColumn(4, Msg.translate(Env.getCtx(),"Balance carried forward"));
+		setLabelOfColumn(7, Msg.translate(Env.getCtx(),"Current Balance"));
+		setLabelOfColumn(8, Msg.translate(Env.getCtx(),"Ending Balance"));		
+		setLabelOfColumn(9, "");
+		setLabelOfColumn(10, "");
+		setLabelOfColumn(11, "");
+		setLabelOfColumn(12, "");
+
+		
+		Date dateFrom = dateboxDateFrom.getValue();
+		Date dateTo = dateboxDateTo.getValue();
+
+		Timestamp tDateFrom = new Timestamp(0);
+
+		Timestamp tDateTo = new Timestamp(0);
+
+		if (dateFrom == null) {
+			dateFrom = new Date();
+			dateFrom.setTime(tDateFrom.getTime() + 10000);
+		}
+
+		if (dateFrom != null)
+			tDateFrom = new Timestamp(dateFrom.getTime());
+
+		if (dateTo == null)
+			tDateTo = new Timestamp(Env.getContextAsDate(Env.getCtx(), "Date").getTime());
+		else
+			tDateTo = new Timestamp(dateTo.getTime());
+
+		params.put("organisation", listboxOrganisation.getSelectedItem().getLabel());
+		params.put("acctschema", listboxSelAcctSchema.getSelectedItem().getValue());
+		params.put("valueFrom", "");
+		params.put("valueTo", "");
+		params.put("dateFrom", tDateFrom);
+		params.put("dateTo", tDateTo);
+
+		addRecords(p_data.getRecords(sqls.getSqlBalanceOfAccountsList(tDateFrom,tDateTo), params));
+
+		labelDebit.setValue("");
+		labelCredit.setValue("");
+		labelBalance.setValue("");
+
+
+	}
+	
+	
 
 	@Override
 	public void valueChange(ValueChangeEvent evt) {
