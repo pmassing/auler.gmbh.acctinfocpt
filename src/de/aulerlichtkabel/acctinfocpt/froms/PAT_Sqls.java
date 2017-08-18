@@ -432,24 +432,24 @@ public class PAT_Sqls {
 				+ "group by row");
 
 	}
-
+	
 	public StringBuilder getSqlAccountsOverView() {
 
 		return new StringBuilder()
 				.append("select "
 
-						+ "row, "
+						+ "null as row, "
 						+ "null as fact_acct_id, "
-						+ "clientname, "
-						+ "orgname, "
+						+ "(select name from ad_client where ad_client_id=f.ad_client_id) as clientname, "
+						+ "(select name from ad_org where ad_org_id =f.ad_org_id) as orgname, "
 						+ "account_id, "
-						+ "account_value, "
-						+ "account_name, "
-						+ "null as datetrx,"
-						+ "null as dateacct,"
-						+ "round(sum(amtacctdr),2) as amtacctdr, "
-						+ "round(sum(amtacctcr),2) as amtacctcr, "
-						+ "round(sum(amtacctdr-amtacctcr),2) as current_balance, "
+						+ "(select value from c_elementvalue e where e.c_elementvalue_id = f.account_id) as account_value, "
+						+ "(select name from c_elementvalue e where e.c_elementvalue_id = f.account_id) as account_name, "
+						+ "null as datetrx, "
+						+ "null as dateacct, "
+						+ "round(sum(f.amtacctdr),2) as amtacctdr, "
+						+ "round(sum(f.amtacctcr),2) as amtacctcr, "
+						+ "round(sum(f.amtacctdr-f.amtacctcr),2) as current_balance, "
 						+ "null as product_value, "
 						+ "null as product_description, "
 						+ "null as project_value, "
@@ -460,26 +460,23 @@ public class PAT_Sqls {
 						+ "null as tablename, "
 						+ "null as record_id "
 
-						+ "from pat_facourse "
+						+ "from fact_acct f "
 
-						+ "where account_value in (select value from c_elementvalue ev "
-						+ "where ev.c_elementvalue_id "
-						+ "in (select account_id from fact_acct where ad_client_id ="
+						+ "where f.account_id in (select account_id from fact_acct where ad_client_id ="
 						+ Env.getAD_Client_ID(Env.getCtx())
-						+ " group by account_id) " + ") "
+						+ " )"
+						+ " and dateacct between ? and ? "
 
-						+ "and dateacct between ? and ? "
+						+ " and f.ad_client_id = (select ad_client_id from ad_client where name= ? ) "
 
-						+ "and clientname = ? "
+						+ " and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "
 
-						+ "and orgname = ? "
+						+ " and f.c_acctschema_id = ? "
+						
+						+ "group by "
+						+ "f.account_id,f.ad_client_id,f.ad_org_id "
 
-						+ " and c_acctschema_id = ? "
-
-						+ "group by " + "row, " + "clientname, " + "orgname, "
-						+ "account_id, " + "account_value, " + "account_name "
-
-						+ "order by account_value ");
+						+ "order by (select value from c_elementvalue e where e.c_elementvalue_id = f.account_id)");
 
 	}
 
@@ -494,11 +491,11 @@ public class PAT_Sqls {
 						+ "null as account_id, "
 						+ "null as account_value, "
 						+ "null as account_name, "
-						+ "null as datetrx,"
-						+ "null as dateacct,"
-						+ "round(sum(amtacctdr),2),"
-						+ "round(sum(amtacctcr),2),"
-						+ "round(sum(amtacctdr-amtacctcr),2), "
+						+ "null as datetrx, "
+						+ "null as dateacct, "
+						+ "round(sum(f.amtacctdr),2) as amtacctdr, "
+						+ "round(sum(f.amtacctcr),2) as amtacctcr, "
+						+ "round(sum(f.amtacctdr-f.amtacctcr),2) as current_balance, "
 						+ "null as product_value, "
 						+ "null as product_description, "
 						+ "null as project_value, "
@@ -509,19 +506,16 @@ public class PAT_Sqls {
 						+ "null as tablename, "
 						+ "null as record_id "
 
-						+ "from pat_facourse f "
+						+ "from fact_acct f "
 
-						+ "where account_value in (select value from c_elementvalue ev "
-						+ "where ev.c_elementvalue_id "
-						+ "in (select account_id from fact_acct where ad_client_id ="
+						+ "where f.account_id in (select account_id from fact_acct where ad_client_id ="
 						+ Env.getAD_Client_ID(Env.getCtx())
-						+ " group by account_id) " + ") "
+						+ " )"
+						+ " and dateacct between ? and ? "
 
-						+ "and dateacct between ? and ? "
+						+ " and f.ad_client_id = (select ad_client_id from ad_client where name= ? ) "
 
-						+ "and clientname = ? "
-
-						+ "and orgname = ? "
+						+ " and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "
 
 						+ " and c_acctschema_id = ? "
 
