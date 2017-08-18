@@ -74,6 +74,7 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.ValueNamePair;
+import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -81,7 +82,6 @@ import org.zkoss.zul.Center;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.Vbox;
-
 import org.zkoss.zul.Label;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Space;
@@ -504,26 +504,26 @@ public class PAT_WAcctInfCptForm
 	private List<String> headColumns() {
 
 		List<String> headColumn = new ArrayList<String>();
-		headColumn.add("Client");
-		headColumn.add("Organisation");
-		headColumn.add("Account");
-		headColumn.add("Name");
-		headColumn.add("DateAcct");
-		headColumn.add("Debit");
-		headColumn.add("Credit");
-		headColumn.add("Balance");
-		headColumn.add(new String("Product").replaceAll("[&]", ""));
-		headColumn.add(new String("BPartner").replaceAll("[&]", ""));
-		headColumn.add("SalesRegion");
-		headColumn.add("Project");
-		headColumn.add("Table");
+		headColumn.add(Msg.translate(Env.getCtx(), "Client"));
+		headColumn.add(Msg.translate(Env.getCtx(), "Organisation"));
+		headColumn.add(Msg.translate(Env.getCtx(), "Account"));
+		headColumn.add(Msg.translate(Env.getCtx(), "Name"));
+		headColumn.add(Msg.translate(Env.getCtx(), "DateAcct"));
+		headColumn.add(Msg.translate(Env.getCtx(), "Debit"));
+		headColumn.add(Msg.translate(Env.getCtx(), "Credit"));
+		headColumn.add(Msg.translate(Env.getCtx(), "Balance"));
+		headColumn.add(Msg.translate(Env.getCtx(), new String("Product").replaceAll("[&]", "")));
+		headColumn.add(Msg.translate(Env.getCtx(), new String("BPartner").replaceAll("[&]", "")));
+		headColumn.add(Msg.translate(Env.getCtx(), "SalesRegion"));
+		headColumn.add(Msg.translate(Env.getCtx(), "Project"));
+		headColumn.add(Msg.translate(Env.getCtx(), "Table"));
 
 		return headColumn;
 
 	}
 
 	private void clearList() {
-
+		
 		listboxResult.removeAllItems();
 
 	}
@@ -546,6 +546,70 @@ public class PAT_WAcctInfCptForm
 
 		return listhead;
 
+	}
+
+	private void setLabelOfColumn(int pos, String label){
+		
+		int p = 0;
+		
+		ListHead listhead = null;		
+
+		for(Component c : listboxResult.getHeads()){
+
+			if(c instanceof ListHead){
+				
+				listhead = (ListHead)c;
+	
+				for (Component c2 : listhead.getChildren()){
+					
+					ListHeader listheader = null;
+					
+					if(c2 instanceof ListHeader){
+						
+						listheader = (ListHeader)c2;
+						
+						if(p==pos)
+							listheader.setLabel(Msg.getMsg(Env.getCtx(), label));
+						
+					}
+
+					p++;
+				}
+
+			}
+		}	
+		
+
+	}
+	
+	private void refreshHeader(){
+		int p = 0;
+		
+		ListHead listhead = null;		
+
+		for(Component c : listboxResult.getHeads()){
+
+			if(c instanceof ListHead){
+				
+				listhead = (ListHead)c;
+	
+				for (Component c2 : listhead.getChildren()){
+					
+					ListHeader listheader = null;
+					
+					if(c2 instanceof ListHeader){
+						
+						listheader = (ListHeader)c2;
+						listheader.setLabel(headColumns().get(p));
+						
+					}
+					
+					p++;
+
+				}
+
+			}
+		}	
 	}
 
 	private void addRecords(List<List<Object>> objs) {
@@ -618,6 +682,7 @@ public class PAT_WAcctInfCptForm
 
 	@Override
 	public void onEvent(Event event) throws Exception {
+		
 
 		if (event.getTarget() == bCancel || event.getTarget() == bOkay)
 			dispose();
@@ -637,7 +702,8 @@ public class PAT_WAcctInfCptForm
 
 			clearParameters();
 			clearList();
-
+			refreshHeader();
+			
 			isAccountCourse = true;
 			isAccountsOverView = false;
 			isAccountOverView = false;
@@ -666,7 +732,8 @@ public class PAT_WAcctInfCptForm
 
 			clearParameters();
 			clearList();
-
+			refreshHeader();
+			
 			isAccountCourse = false;
 			isAccountsOverView = true;
 			isAccountOverView = false;
@@ -695,7 +762,8 @@ public class PAT_WAcctInfCptForm
 
 			clearParameters();
 			clearList();
-
+			refreshHeader();
+			
 			isAccountCourse = false;
 			isAccountsOverView = false;
 			isAccountOverView = true;
@@ -724,7 +792,8 @@ public class PAT_WAcctInfCptForm
 
 			clearParameters();
 			clearList();
-
+			refreshHeader();
+			
 			isAccountCourse = false;
 			isAccountsOverView = false;
 			isAccountOverView = false;
@@ -752,7 +821,8 @@ public class PAT_WAcctInfCptForm
 
 			clearParameters();
 			clearList();
-
+			refreshHeader();
+			
 			setCheckboxOnYear();
 
 			isAccountCourse = false;
@@ -901,6 +971,14 @@ public class PAT_WAcctInfCptForm
 
 	private void accountsOverView() {
 
+		setLabelOfColumn(4, "");
+		setLabelOfColumn(8, "");
+		setLabelOfColumn(9, "");
+		setLabelOfColumn(10, "");
+		setLabelOfColumn(11, "");
+		setLabelOfColumn(12, "");
+
+		
 		Date dateFrom = dateboxDateFrom.getValue();
 		Date dateTo = dateboxDateTo.getValue();
 
@@ -933,6 +1011,8 @@ public class PAT_WAcctInfCptForm
 		setBalance(sqls.getSqlAccountsOverViewBalance(), params);
 
 	}
+	
+
 
 	private void accountOverView() {
 
