@@ -61,6 +61,10 @@ public class PAT_Data {
 	private Integer docID = 0;
 	private StringBuilder docOrgName = new StringBuilder();
 	private boolean hasDocnoCol = false;
+	
+	private BigDecimal debit = new BigDecimal("0");
+	private BigDecimal credit = new BigDecimal("0");
+	private BigDecimal balance = new BigDecimal("0");
 
 	/** Logger */
 	public static CLogger log = CLogger.getCLogger(PAT_WAcctInfCptForm.class);
@@ -313,6 +317,10 @@ public class PAT_Data {
 			}
 
 			rs = pstmt.executeQuery();
+			
+			debit=Env.ZERO;
+			credit=Env.ZERO;
+			balance=Env.ZERO;
 
 			while (rs.next()) {
 				List<Object> row = new ArrayList<Object>();
@@ -353,18 +361,25 @@ public class PAT_Data {
 				// <== DateAcct or Balance Carried Forward
  				
 				// Debit
-				if (rs.getBigDecimal(10) != null)
+				if (rs.getBigDecimal(10) != null){
 					row.add(numberFormat.format(rs.getBigDecimal(10)));
+					debit=debit.add(rs.getBigDecimal(10));
+				}
 				else
 					row.add("");
 				// Credit
-				if (rs.getBigDecimal(11) != null)
+				if (rs.getBigDecimal(11) != null){
 					row.add(numberFormat.format(rs.getBigDecimal(11)));
+					credit=credit.add(rs.getBigDecimal(11));
+				}
 				else
 					row.add("");
 				// Balance
-				if (rs.getBigDecimal(12) != null)
+				if (rs.getBigDecimal(12) != null){
 					row.add(numberFormat.format(rs.getBigDecimal(12)));
+					balance=balance.add(rs.getBigDecimal(12));
+				}
+				
 				else
 					row.add("");
 				
@@ -419,4 +434,18 @@ public class PAT_Data {
 
 	}
 	
+	public BigDecimal getDebit(){
+		
+		return debit;
+	}
+	
+	public BigDecimal getCredit(){
+		
+		return credit;
+	}
+
+	public BigDecimal getBalance(){
+		
+		return balance;
+	}	
 }

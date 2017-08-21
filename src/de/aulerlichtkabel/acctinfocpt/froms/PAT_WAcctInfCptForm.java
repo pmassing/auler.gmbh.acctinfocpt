@@ -22,6 +22,7 @@
 
 package de.aulerlichtkabel.acctinfocpt.froms;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -979,6 +980,9 @@ public class PAT_WAcctInfCptForm
 	}
 
 	private void setCheckboxOnYear() {
+		dateboxDateFrom.setValue(null);
+		dateboxDateTo.setValue(null);
+		rowDate.setVisible(false);
 		checkboxOnYear.setChecked(true);
 		checkboxOnMonth.setChecked(false);
 		checkboxOnDay.setChecked(false);
@@ -986,12 +990,14 @@ public class PAT_WAcctInfCptForm
 
 	private void setCheckboxOnMonth() {
 
+		rowDate.setVisible(true);
 		checkboxOnYear.setChecked(false);
 		checkboxOnDay.setChecked(false);
 	}
 
 	private void setCheckboxOnDay() {
 
+		rowDate.setVisible(true);
 		checkboxOnYear.setChecked(false);
 		checkboxOnMonth.setChecked(false);
 	}
@@ -1085,7 +1091,7 @@ public class PAT_WAcctInfCptForm
 
 		addRecords(p_data.getRecords(sqls.getSqlAccountsOverView(params), params));
 
-		setBalance(sqls.getSqlAccountsOverViewBalance(params), params);
+		setBalanceofAccountslist(p_data.getDebit(),p_data.getCredit(),p_data.getBalance());
 
 	}
 	
@@ -1129,7 +1135,7 @@ public class PAT_WAcctInfCptForm
 
 		if ((searchEditorValueFrom.getValue() != null)) {
 			addRecords(p_data.getRecords(sqls.getSqlAccountOverView(params), params));
-			setBalance(sqls.getSqlAccountOverViewBalance(params), params);
+			setBalanceofAccountslist(p_data.getDebit(),p_data.getCredit(),p_data.getBalance());
 		} else
 			FDialog.error(m_WindowNo, mForm, "ParameterError",
 					Msg.translate(Env.getCtx(), "AccountValues are needed !"));
@@ -1156,7 +1162,7 @@ public class PAT_WAcctInfCptForm
 
 		if ((searchEditorValueFrom.getValue() != null) || (searchEditorValueTo.getValue() != null)) {
 			addRecords(p_data.getRecords(sqls.getSqlOnYear(params), params));
-			setBalance(sqls.getSqlOnYearBalance(params), params);
+			setBalanceofAccountslist(p_data.getDebit(),p_data.getCredit(),p_data.getBalance());
 		} else
 			FDialog.error(m_WindowNo, mForm, "ParameterError",
 					Msg.translate(Env.getCtx(), "AccountValues are needed !"));
@@ -1202,7 +1208,7 @@ public class PAT_WAcctInfCptForm
 		if ((searchEditorValueFrom.getValue() != null) || (searchEditorValueTo.getValue() != null)) {
 
 			addRecords(p_data.getRecords(sqls.getSqlOnMonth(params), params));
-			setBalance(sqls.getSqlOnMonthBalance(params), params);
+			setBalanceofAccountslist(p_data.getDebit(),p_data.getCredit(),p_data.getBalance());
 
 		} else
 			FDialog.error(m_WindowNo, mForm, "ParameterError",
@@ -1249,7 +1255,7 @@ public class PAT_WAcctInfCptForm
 		if ((searchEditorValueFrom.getValue() != null) || (searchEditorValueTo.getValue() != null)) {
 
 			addRecords(p_data.getRecords(sqls.getSqlOnDay(params), params));
-			setBalance(sqls.getSqlOnDayBalance(params), params);
+			setBalanceofAccountslist(p_data.getDebit(),p_data.getCredit(),p_data.getBalance());
 
 		} else
 			FDialog.error(m_WindowNo, mForm, "ParameterError",
@@ -1271,7 +1277,8 @@ public class PAT_WAcctInfCptForm
 
 			addRecords(p_data.getRecords(sqls.getSqlDocumentAcct(), params));
 
-			setBalance(sqls.getSqlDocumentAcctBalance(), params);
+			setBalanceofAccountslist(p_data.getDebit(),p_data.getCredit(),p_data.getBalance());
+
 		} else
 			FDialog.error(m_WindowNo, mForm, "ParameterError",
 					Msg.translate(Env.getCtx(), "No dates and accountValues are needed, but doctype and documentno!"));
@@ -1316,34 +1323,23 @@ public class PAT_WAcctInfCptForm
 		params.put("dateTo", tDateTo);
 
 		addRecords(p_data.getRecords(sqls.getSqlBalanceOfAccountsList(params), params));
-		setBalance(sqls.getSqlBalanceOfAccountsListBalance(params), params);
-
+		
+		setBalanceofAccountslist(p_data.getDebit(),p_data.getCredit(),p_data.getBalance());
+		
 	}
 
-	private void setBalance(StringBuilder sql, Map<String, Object> params) {
+	private void setBalanceofAccountslist(BigDecimal debit,BigDecimal credit,BigDecimal balance){
+		
+		labelDebit.setValue(numberFormat.format(debit));
+		labelCredit.setValue(numberFormat.format(credit));
+		labelBalance.setValue(numberFormat.format(balance));	
 
-		List<List<Object>> litems = p_data.getRecords(sql, params);
-
-		if (!litems.isEmpty()) {
-			labelDebit.setValue(litems.get(0).get(5).toString());
-			labelCredit.setValue(litems.get(0).get(6).toString());
-			labelBalance.setValue(litems.get(0).get(7).toString());
-
-			try {
-
-				if (numberFormat.parse(litems.get(0).get(7).toString()).floatValue() < 0)
-					labelBalance.setStyle("color:red;font-weight: bold");
-				else
-					labelBalance.setStyle("color:black;font-weight: bold");
-
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-
-		}
-
-	}	
-
+			if (balance.compareTo(Env.ZERO) == -1)
+				labelBalance.setStyle("color:red;font-weight: bold");
+			else
+				labelBalance.setStyle("color:black;font-weight: bold");
+	}
+	
 	@Override
 	public void valueChange(ValueChangeEvent evt) {
 
