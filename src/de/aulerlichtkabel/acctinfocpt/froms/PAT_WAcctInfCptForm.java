@@ -785,7 +785,7 @@ public class PAT_WAcctInfCptForm
 			rowAcctSchema.setVisible(true);
 			rowAccountDocument.setVisible(false);
 			rowAcctValue.setVisible(false);
-			rowDate.setVisible(true);
+			rowDate.setVisible(false);
 			rowDimension.setVisible(false);
 			rowDimension2.setVisible(false);
 
