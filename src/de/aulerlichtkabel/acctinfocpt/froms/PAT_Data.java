@@ -23,6 +23,7 @@
 package de.aulerlichtkabel.acctinfocpt.froms;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -86,12 +87,12 @@ public class PAT_Data {
 		}
 	}
 
-	public void getDocument(int windowNo, String tableName, Label label, Listbox box) {
+	public void getDocument(int windowNo, String tableName, final Label label, final Listbox box) {
 
 		docID = 0;
 		docTableName.delete(0, docTableName.length());
 
-		MTable table = new MTable(Env.getCtx(), new Integer(box.getSelectedItem().getValue()), null);
+		final MTable table = new MTable(Env.getCtx(), new Integer((String)box.getSelectedItem().getValue()), null);
 
 		hasDocnoCol = false;
 		if(table.getColumn("DocumentNo") != null)
@@ -109,6 +110,7 @@ public class PAT_Data {
 			}
 
 			info.setVisible(true);
+			
 			info.addEventListener(DialogEvents.ON_WINDOW_CLOSE, new EventListener<Event>() {
 				@Override
 				public void onEvent(Event event) throws Exception {
@@ -130,6 +132,8 @@ public class PAT_Data {
 				}
 			});
 			AEnv.showWindow(info);
+			
+			
 		}
 	}
 
@@ -274,10 +278,14 @@ public class PAT_Data {
 			// Organistation
 			if ((boolean) params.get("summaryDocument"))
 				pstmt.setString(idx, getDocOrgName().toString());
-			else
-				pstmt.setString(idx, (String) params.get("organisation"));
-
-			idx++;
+			else{
+				
+				if(!((String) params.get("organisation")).equals("*")){
+					pstmt.setString(idx, (String) params.get("organisation"));
+					idx++;
+				}
+					
+			}
 
 			// AcctSchema
 			if (!(boolean) params.get("summaryDocument")) {
@@ -331,18 +339,17 @@ public class PAT_Data {
 					row.add("");
 
 				// DateAcct or Balance Carried Forward
-				if (rs.getObject(9) instanceof Timestamp)
-					if (rs.getTimestamp(9) != null)
+				if (rs.getObject(9) != null){
+					
+					if (rs.getObject(9) instanceof Timestamp)
 						row.add(dateFormat.format(rs.getTimestamp(9)));
-					else
-						row.add("");
 				
-				if (rs.getObject(9) instanceof BigDecimal)
-					if (rs.getBigDecimal(9) != null)
+					if (rs.getObject(9) instanceof BigDecimal)
 						row.add(numberFormat.format(rs.getBigDecimal(9)));
-					else
-						row.add("");
 
+				}
+				else
+					row.add("");
 				// <== DateAcct or Balance Carried Forward
  				
 				// Debit
@@ -362,17 +369,17 @@ public class PAT_Data {
 					row.add("");
 				
 				// Product or Ending Balance
-				if (rs.getObject(13) instanceof String)				
-					if (rs.getString(13) != null)
+				if (rs.getObject(13) != null){
+					
+					if (rs.getObject(13) instanceof String)				
 						row.add(rs.getString(13));
-					else
-						row.add("");
 				
-				if (rs.getObject(13) instanceof BigDecimal)				
-					if (rs.getBigDecimal(13) != null)
+					if (rs.getObject(13) instanceof BigDecimal)				
 						row.add(rs.getBigDecimal(13));
-					else
-						row.add("");
+
+				}
+				else
+					row.add("");
 				// <== Product or Ending Balance
 
 				
@@ -411,5 +418,5 @@ public class PAT_Data {
 		return rows;
 
 	}
-
+	
 }

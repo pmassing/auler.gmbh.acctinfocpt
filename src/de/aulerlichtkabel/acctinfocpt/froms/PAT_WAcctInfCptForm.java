@@ -23,7 +23,6 @@
 package de.aulerlichtkabel.acctinfocpt.froms;
 
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -191,8 +190,6 @@ public class PAT_WAcctInfCptForm
 	// Format
 	public DecimalFormat numberFormat = DisplayType.getNumberFormat(DisplayType.Amount);
 
-	DateFormat dateFormat;
-
 	private boolean isAccountCourse = false;
 	private boolean isAccountsOverView = false;
 	private boolean isAccountOverView = false;
@@ -244,8 +241,6 @@ public class PAT_WAcctInfCptForm
 
 		mForm.appendChild(layout);
 
-		dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM,
-				Env.getLanguage(Env.getCtx()).getLocale());
 	}
 
 	private void createTabs() {
@@ -323,6 +318,7 @@ public class PAT_WAcctInfCptForm
 
 		labelOrganisation.setValue(Msg.translate(Env.getCtx(), "Organisation"));
 
+		listboxOrganisation.appendItem("*",null);
 		for (MOrg org : p_data.getOrganisations())
 			listboxOrganisation.appendItem(org.getName(), org.getAD_Org_ID());
 		listboxOrganisation.setWidth("100px");
@@ -398,8 +394,13 @@ public class PAT_WAcctInfCptForm
 
 		rowAcctValue.appendChild(labelValueFrom);
 		rowAcctValue.appendChild(searchEditorValueFrom.getComponent());
-		rowAcctValue.appendChild(labelValueTo);
-		rowAcctValue.appendChild(searchEditorValueTo.getComponent());
+		
+		// ==> not needed at the moment
+//		rowAcctValue.appendChild(labelValueTo);
+//		rowAcctValue.appendChild(searchEditorValueTo.getComponent());
+		rowAccountDocument.appendChild(new Space());
+		rowAccountDocument.appendChild(new Space());
+		// <== not needed at the moment
 
 		rowDimension.appendChild(labelProduct);
 		rowDimension.appendChild(searchEditorProduct.getComponent());
@@ -652,11 +653,14 @@ public class PAT_WAcctInfCptForm
 
 				try {
 
-					if (numberFormat.parse(o.toString()).floatValue() < 0)
-						cell.setStyle("color:red;font-weight: bold;text-align: right");
-					else
-						cell.setStyle("font-weight: bold;text-align: right");
-
+					if(!o.toString().equals("")){
+						
+						if (numberFormat.parse(o.toString()).floatValue() < 0)
+							cell.setStyle("color:red;font-weight: bold;text-align: right");
+						else
+							cell.setStyle("font-weight: bold;text-align: right");
+					}
+					
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
@@ -667,20 +671,25 @@ public class PAT_WAcctInfCptForm
 				// In this case balance_carried_forward, debit, credit, current_balance, ending_balance
 				if (c >= 5 && c <= 9) {
 					
-					if((cell.getValue() != null) && (c==5 || c==9))
-						cell.setValue(numberFormat.format(cell.getValue()));
+					if(!o.toString().equals("")){
 
-					try {
+						if((cell.getValue() != null) && (c==5 || c==9))
+							cell.setValue(numberFormat.format(cell.getValue()));
 
-						if (numberFormat.parse(o.toString()).floatValue() < 0)
-							cell.setStyle("color:red;font-weight: bold;text-align: right");
-						else
-							cell.setStyle("font-weight: bold;text-align: right");
+						try {
 
-					} catch (ParseException e) {
-						e.printStackTrace();
+							if (numberFormat.parse(o.toString()).floatValue() < 0)
+								cell.setStyle("color:red;font-weight: bold;text-align: right");
+							else
+								cell.setStyle("font-weight: bold;text-align: right");
+
+						} catch (ParseException e) {
+							e.printStackTrace();
+						}
 					}
+					
 				}
+				
 			}			
 
 			item.appendChild(cell);
@@ -869,7 +878,7 @@ public class PAT_WAcctInfCptForm
 			rowAcctSchema.setVisible(true);
 			rowAccountDocument.setVisible(false);
 			rowAcctValue.setVisible(true);
-			rowDate.setVisible(true);
+			rowDate.setVisible(false);
 			rowDimension.setVisible(false);
 			rowDimension2.setVisible(false);
 
@@ -1005,16 +1014,14 @@ public class PAT_WAcctInfCptForm
 
 		Timestamp tDateTo = new Timestamp(0);
 
-		if (dateFrom == null) {
-			dateFrom = new Date();
-			dateFrom.setTime(tDateFrom.getTime() + 10000);
-		}
-
 		if (dateFrom != null)
 			tDateFrom = new Timestamp(dateFrom.getTime());
 
-		if (dateTo == null)
-			tDateTo = new Timestamp(Env.getContextAsDate(Env.getCtx(), "@#Date@").getTime());
+		if (dateFrom == null)
+			tDateFrom.setTime(tDateFrom.getTime() + 10000);
+
+		if (dateTo == null) 
+			tDateTo = new Timestamp(Env.getContextAsDate(Env.getCtx(), "Date").getTime());
 		else
 			tDateTo = new Timestamp(dateTo.getTime());
 
@@ -1026,7 +1033,7 @@ public class PAT_WAcctInfCptForm
 		params.put("dateTo", tDateTo);
 
 		if ((searchEditorValueFrom.getValue() != null) || (searchEditorValueTo.getValue() != null)) {
-			addRecords(p_data.getRecords(sqls.getSqlAccountCourse(), params));
+			addRecords(p_data.getRecords(sqls.getSqlAccountCourse(params), params));
 
 		} else {
 
@@ -1058,16 +1065,14 @@ public class PAT_WAcctInfCptForm
 
 		Timestamp tDateTo = new Timestamp(0);
 
-		if (dateFrom == null) {
-			dateFrom = new Date();
-			dateFrom.setTime(tDateFrom.getTime() + 10000);
-		}
-
 		if (dateFrom != null)
 			tDateFrom = new Timestamp(dateFrom.getTime());
 
-		if (dateTo == null)
-			tDateTo = new Timestamp(Env.getContextAsDate(Env.getCtx(), "@#Date@").getTime());
+		if (dateFrom == null)
+			tDateFrom.setTime(tDateFrom.getTime() + 10000);
+
+		if (dateTo == null) 
+			tDateTo = new Timestamp(Env.getContextAsDate(Env.getCtx(), "Date").getTime());
 		else
 			tDateTo = new Timestamp(dateTo.getTime());
 
@@ -1078,9 +1083,9 @@ public class PAT_WAcctInfCptForm
 		params.put("dateFrom", tDateFrom);
 		params.put("dateTo", tDateTo);
 
-		addRecords(p_data.getRecords(sqls.getSqlAccountsOverView(), params));
+		addRecords(p_data.getRecords(sqls.getSqlAccountsOverView(params), params));
 
-		setBalance(sqls.getSqlAccountsOverViewBalance(), params);
+		setBalance(sqls.getSqlAccountsOverViewBalance(params), params);
 
 	}
 	
@@ -1100,16 +1105,14 @@ public class PAT_WAcctInfCptForm
 
 		Timestamp tDateTo = new Timestamp(0);
 
-		if (dateFrom == null) {
-			dateFrom = new Date();
-			dateFrom.setTime(tDateFrom.getTime() + 10000);
-		}
-
 		if (dateFrom != null)
 			tDateFrom = new Timestamp(dateFrom.getTime());
 
-		if (dateTo == null)
-			tDateTo = new Timestamp(Env.getContextAsDate(Env.getCtx(), "@#Date@").getTime());
+		if (dateFrom == null)
+			tDateFrom.setTime(tDateFrom.getTime() + 10000);
+
+		if (dateTo == null) 
+			tDateTo = new Timestamp(Env.getContextAsDate(Env.getCtx(), "Date").getTime());
 		else
 			tDateTo = new Timestamp(dateTo.getTime());
 
@@ -1125,8 +1128,8 @@ public class PAT_WAcctInfCptForm
 		params.put("project_id", searchEditorProject.getValue());
 
 		if ((searchEditorValueFrom.getValue() != null)) {
-			addRecords(p_data.getRecords(sqls.getSqlAccountOverView(), params));
-			setBalance(sqls.getSqlAccountOverViewBalance(), params);
+			addRecords(p_data.getRecords(sqls.getSqlAccountOverView(params), params));
+			setBalance(sqls.getSqlAccountOverViewBalance(params), params);
 		} else
 			FDialog.error(m_WindowNo, mForm, "ParameterError",
 					Msg.translate(Env.getCtx(), "AccountValues are needed !"));
@@ -1152,8 +1155,8 @@ public class PAT_WAcctInfCptForm
 		params.put("dateTo", new Timestamp(0));
 
 		if ((searchEditorValueFrom.getValue() != null) || (searchEditorValueTo.getValue() != null)) {
-			addRecords(p_data.getRecords(sqls.getSqlOnYear(), params));
-			setBalance(sqls.getSqlOnYearBalance(), params);
+			addRecords(p_data.getRecords(sqls.getSqlOnYear(params), params));
+			setBalance(sqls.getSqlOnYearBalance(params), params);
 		} else
 			FDialog.error(m_WindowNo, mForm, "ParameterError",
 					Msg.translate(Env.getCtx(), "AccountValues are needed !"));
@@ -1178,16 +1181,14 @@ public class PAT_WAcctInfCptForm
 
 		Timestamp tDateTo = new Timestamp(0);
 
-		if (dateFrom == null) {
-			dateFrom = new Date();
-			dateFrom.setTime(tDateFrom.getTime() + 10000);
-		}
-
 		if (dateFrom != null)
 			tDateFrom = new Timestamp(dateFrom.getTime());
 
-		if (dateTo == null)
-			tDateTo = new Timestamp(Env.getContextAsDate(Env.getCtx(), "@#Date@").getTime());
+		if (dateFrom == null)
+			tDateFrom.setTime(tDateFrom.getTime() + 10000);
+
+		if (dateTo == null) 
+			tDateTo = new Timestamp(Env.getContextAsDate(Env.getCtx(), "Date").getTime());
 		else
 			tDateTo = new Timestamp(dateTo.getTime());
 
@@ -1200,8 +1201,8 @@ public class PAT_WAcctInfCptForm
 
 		if ((searchEditorValueFrom.getValue() != null) || (searchEditorValueTo.getValue() != null)) {
 
-			addRecords(p_data.getRecords(sqls.getSqlOnMonth(), params));
-			setBalance(sqls.getSqlOnMonthBalance(), params);
+			addRecords(p_data.getRecords(sqls.getSqlOnMonth(params), params));
+			setBalance(sqls.getSqlOnMonthBalance(params), params);
 
 		} else
 			FDialog.error(m_WindowNo, mForm, "ParameterError",
@@ -1221,23 +1222,20 @@ public class PAT_WAcctInfCptForm
 			valueTo.append(p_data.getElementValue((Integer) searchEditorValueTo.getValue()).getValue());
 
 		Date dateFrom = dateboxDateFrom.getValue();
-
 		Date dateTo = dateboxDateTo.getValue();
 
 		Timestamp tDateFrom = new Timestamp(0);
 
 		Timestamp tDateTo = new Timestamp(0);
 
-		if (dateFrom == null) {
-			dateFrom = new Date();
-			dateFrom.setTime(tDateFrom.getTime() + 10000);
-		}
-
 		if (dateFrom != null)
 			tDateFrom = new Timestamp(dateFrom.getTime());
 
-		if (dateTo == null)
-			tDateTo = new Timestamp(Env.getContextAsDate(Env.getCtx(), "@#Date@").getTime());
+		if (dateFrom == null)
+			tDateFrom.setTime(tDateFrom.getTime() + 10000);
+
+		if (dateTo == null) 
+			tDateTo = new Timestamp(Env.getContextAsDate(Env.getCtx(), "Date").getTime());
 		else
 			tDateTo = new Timestamp(dateTo.getTime());
 
@@ -1250,8 +1248,8 @@ public class PAT_WAcctInfCptForm
 
 		if ((searchEditorValueFrom.getValue() != null) || (searchEditorValueTo.getValue() != null)) {
 
-			addRecords(p_data.getRecords(sqls.getSqlOnDay(), params));
-			setBalance(sqls.getSqlOnDayBalance(), params);
+			addRecords(p_data.getRecords(sqls.getSqlOnDay(params), params));
+			setBalance(sqls.getSqlOnDayBalance(params), params);
 
 		} else
 			FDialog.error(m_WindowNo, mForm, "ParameterError",
@@ -1278,6 +1276,48 @@ public class PAT_WAcctInfCptForm
 			FDialog.error(m_WindowNo, mForm, "ParameterError",
 					Msg.translate(Env.getCtx(), "No dates and accountValues are needed, but doctype and documentno!"));
 
+	}	
+	
+	private void BalanceOfAccountsList() {
+		
+		//balance_carried_forward, debit, credit, current_balance, ending_balance
+		setLabelOfColumn(4, Msg.translate(Env.getCtx(),"Balance carried forward"));
+		setLabelOfColumn(7, Msg.translate(Env.getCtx(),"Current Balance"));
+		setLabelOfColumn(8, Msg.translate(Env.getCtx(),"Ending Balance"));		
+		setLabelOfColumn(9, "");
+		setLabelOfColumn(10, "");
+		setLabelOfColumn(11, "");
+		setLabelOfColumn(12, "");
+
+		
+		Date dateFrom = dateboxDateFrom.getValue();
+		Date dateTo = dateboxDateTo.getValue();
+
+		Timestamp tDateFrom = new Timestamp(0);
+
+		Timestamp tDateTo = new Timestamp(0);
+
+		if (dateFrom != null)
+			tDateFrom = new Timestamp(dateFrom.getTime());
+
+		if (dateFrom == null)
+			tDateFrom.setTime(tDateFrom.getTime() + 10000);
+
+		if (dateTo == null) 
+			tDateTo = new Timestamp(Env.getContextAsDate(Env.getCtx(), "Date").getTime());
+		else
+			tDateTo = new Timestamp(dateTo.getTime());
+
+		params.put("organisation", listboxOrganisation.getSelectedItem().getLabel());
+		params.put("acctschema", listboxSelAcctSchema.getSelectedItem().getValue());
+		params.put("valueFrom", "");
+		params.put("valueTo", "");
+		params.put("dateFrom", tDateFrom);
+		params.put("dateTo", tDateTo);
+
+		addRecords(p_data.getRecords(sqls.getSqlBalanceOfAccountsList(params), params));
+		setBalance(sqls.getSqlBalanceOfAccountsListBalance(params), params);
+
 	}
 
 	private void setBalance(StringBuilder sql, Map<String, Object> params) {
@@ -1302,57 +1342,7 @@ public class PAT_WAcctInfCptForm
 
 		}
 
-	}
-	
-	
-	private void BalanceOfAccountsList() {
-		//balance_carried_forward, debit, credit, current_balance, ending_balance
-		setLabelOfColumn(4, Msg.translate(Env.getCtx(),"Balance carried forward"));
-		setLabelOfColumn(7, Msg.translate(Env.getCtx(),"Current Balance"));
-		setLabelOfColumn(8, Msg.translate(Env.getCtx(),"Ending Balance"));		
-		setLabelOfColumn(9, "");
-		setLabelOfColumn(10, "");
-		setLabelOfColumn(11, "");
-		setLabelOfColumn(12, "");
-
-		
-		Date dateFrom = dateboxDateFrom.getValue();
-		Date dateTo = dateboxDateTo.getValue();
-
-		Timestamp tDateFrom = new Timestamp(0);
-
-		Timestamp tDateTo = new Timestamp(0);
-
-		if (dateFrom == null) {
-			dateFrom = new Date();
-			dateFrom.setTime(tDateFrom.getTime() + 10000);
-		}
-
-		if (dateFrom != null)
-			tDateFrom = new Timestamp(dateFrom.getTime());
-
-		if (dateTo == null)
-			tDateTo = new Timestamp(Env.getContextAsDate(Env.getCtx(), "Date").getTime());
-		else
-			tDateTo = new Timestamp(dateTo.getTime());
-
-		params.put("organisation", listboxOrganisation.getSelectedItem().getLabel());
-		params.put("acctschema", listboxSelAcctSchema.getSelectedItem().getValue());
-		params.put("valueFrom", "");
-		params.put("valueTo", "");
-		params.put("dateFrom", tDateFrom);
-		params.put("dateTo", tDateTo);
-
-		addRecords(p_data.getRecords(sqls.getSqlBalanceOfAccountsList(tDateFrom,tDateTo), params));
-
-		labelDebit.setValue("");
-		labelCredit.setValue("");
-		labelBalance.setValue("");
-
-
-	}
-	
-	
+	}	
 
 	@Override
 	public void valueChange(ValueChangeEvent evt) {

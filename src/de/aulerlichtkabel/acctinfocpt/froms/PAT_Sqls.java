@@ -22,26 +22,20 @@
 
 package de.aulerlichtkabel.acctinfocpt.froms;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
+import java.util.Map;
 
-import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 
 public class PAT_Sqls {
-
-	
-	private SimpleDateFormat dateFormat = DisplayType.getDateFormat(DisplayType.Date);
 	
 	
 	public PAT_Sqls() {
 		super();
 	}
 
-	public StringBuilder getSqlOnYear() {
+	public StringBuilder getSqlOnYear(Map<String, Object> params) {
 
-		return new StringBuilder()
+		StringBuilder sql = new StringBuilder()
 				.append("select "
 						+ "1 as row,"
 						+ "null as fact_acct_id,"
@@ -51,9 +45,9 @@ public class PAT_Sqls {
 						+ "account_value,"
 						+ "account_name,"
 						+ "null as datetrx,"
-						+ "date_trunc('month'::text, "
+						+ "(date_trunc('month'::text, "
 						+ "firstof(dateacct::timestamp with time zone, 'YY'::character varying)"
-						+ "::timestamp with time zone) + 12::double precision * '1 mon'::interval - 1::numeric "
+						+ "::timestamp with time zone) + 12::double precision * '1 mon'::interval - 1::numeric)::timestamp "
 						+ "AS dateacct,"
 						+ "round(sum(amtacctdr),2),"
 						+ "round(sum(amtacctcr),2),"
@@ -92,11 +86,16 @@ public class PAT_Sqls {
 
 						+ "Order by " + "account_value");
 
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+
+		return sql;
+
 	}
 
-	public StringBuilder getSqlOnYearBalance() {
+	public StringBuilder getSqlOnYearBalance(Map<String, Object> params) {
 
-		return new StringBuilder().append("select "
+		StringBuilder sql = new StringBuilder().append("select "
 
 		+ "null as row, " + "null as fact_acct_id, " + "null as clientname, "
 				+ "null as orgname, " + "null as account_id, "
@@ -122,11 +121,16 @@ public class PAT_Sqls {
 
 				+ "group by " + "row");
 
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+
+		return sql;
+		
 	}
 
-	public StringBuilder getSqlOnMonth() {
+	public StringBuilder getSqlOnMonth(Map<String, Object> params) {
 
-		return new StringBuilder()
+		StringBuilder sql = new StringBuilder()
 				.append("select "
 						+ "1 as row,"
 						+ "null as fact_acct_id,"
@@ -136,9 +140,9 @@ public class PAT_Sqls {
 						+ "account_value,"
 						+ "account_name,"
 						+ "null as datetrx,"
-						+ "date_trunc('month'::text, "
+						+ "(date_trunc('month'::text, "
 						+ "firstof(dateacct::timestamp with time zone, 'MM'::character varying)"
-						+ "::timestamp with time zone) + 1::double precision * '1 mon'::interval - 1::numeric "
+						+ "::timestamp with time zone) + 1::double precision * '1 mon'::interval - 1::numeric)::timestamp "
 						+ "AS dateacct,"
 						+ "round(sum(amtacctdr),2),"
 						+ "round(sum(amtacctcr),2),"
@@ -179,11 +183,16 @@ public class PAT_Sqls {
 						
 						+ "firstof(min(dateacct)::timestamp with time zone, 'MM'::character varying)");
 
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+
+		return sql;
+
 	}
 
-	public StringBuilder getSqlOnMonthBalance() {
+	public StringBuilder getSqlOnMonthBalance(Map<String, Object> params) {
 
-		return new StringBuilder()
+		StringBuilder sql = new StringBuilder()
 				.append("select "
 						+ "null as row, "
 						+ "null as fact_acct_id, "
@@ -219,11 +228,16 @@ public class PAT_Sqls {
 
 						+ "group by " + "row");
 
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+
+		return sql;
+
 	}
 
-	public StringBuilder getSqlOnDay() {
+	public StringBuilder getSqlOnDay(Map<String, Object> params) {
 
-		return new StringBuilder()
+		StringBuilder sql = new StringBuilder()
 				.append("select "
 						+ "1 as row,"
 						+ "null as fact_acct_id,"
@@ -233,7 +247,7 @@ public class PAT_Sqls {
 						+ "account_value,"
 						+ "account_name,"
 						+ "null as datetrx, "
-						+ "firstof(dateacct::timestamp with time zone, 'DD'::character varying) AS dateacct,"
+						+ "firstof(dateacct::timestamp with time zone, 'DD'::character varying)::timestamp AS dateacct,"
 						+ "round(sum(amtacctdr),2),"
 						+ "round(sum(amtacctcr),2),"
 						+ "round(sum(amtacctdr-amtacctcr),2) as current_balance,"
@@ -271,11 +285,16 @@ public class PAT_Sqls {
 						
 						+ "firstof(min(dateacct)::timestamp with time zone, 'DD'::character varying) ");
 
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+
+		return sql;
+
 	}
 
-	public StringBuilder getSqlOnDayBalance() {
+	public StringBuilder getSqlOnDayBalance(Map<String, Object> params) {
 
-		return new StringBuilder()
+		StringBuilder sql =  new StringBuilder()
 				.append("select "
 						+ "null as row, "
 						+ "null as fact_acct_id, "
@@ -310,11 +329,16 @@ public class PAT_Sqls {
 
 						+ "group by " + "row");
 
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+
+		return sql;
+
 	}
 
-	public StringBuilder getSqlAccountCourse() {
+	public StringBuilder getSqlAccountCourse(Map<String, Object> params) {
 
-		return new StringBuilder()
+		StringBuilder sql =  new StringBuilder()
 				.append("select "
 
 						+ "row, "
@@ -373,6 +397,10 @@ public class PAT_Sqls {
 						
 						+ " order by dateacct");
 		
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+
+		return sql;
 		
 	}
 
@@ -442,9 +470,9 @@ public class PAT_Sqls {
 
 	}
 	
-	public StringBuilder getSqlAccountsOverView() {
+	public StringBuilder getSqlAccountsOverView(Map<String, Object> params) {
 
-		return new StringBuilder()
+		StringBuilder sql =  new StringBuilder()
 				.append("select "
 
 						+ "null as row, "
@@ -487,11 +515,16 @@ public class PAT_Sqls {
 
 						+ "order by (select value from c_elementvalue e where e.c_elementvalue_id = f.account_id)");
 
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "), sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ")+(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ").length());
+
+		return sql;
+		
 	}
 
-	public StringBuilder getSqlAccountsOverViewBalance() {
+	public StringBuilder getSqlAccountsOverViewBalance(Map<String, Object> params) {
 
-		return new StringBuilder()
+		StringBuilder sql = new StringBuilder()
 				.append("select "
 						+ "null as row, "
 						+ "null as fact_acct_id, "
@@ -530,11 +563,16 @@ public class PAT_Sqls {
 
 						+ "group by " + "row");
 
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "), sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ")+(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ").length());
+
+		return sql;
+		
 	}
 
-	public StringBuilder getSqlAccountOverView() {
+	public StringBuilder getSqlAccountOverView(Map<String, Object> params) {
 
-		return new StringBuilder().append("select "
+		StringBuilder sql = new StringBuilder().append("select "
 
 				+ "row, " 
 				+ "null as fact_acct_id, " 
@@ -577,12 +615,17 @@ public class PAT_Sqls {
 				+ "salesregion, " + "tablename "
 
 				+ "order by dateacct ");
+				
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
 
+		return sql;
+		
 	}
 
-	public StringBuilder getSqlAccountOverViewBalance() {
+	public StringBuilder getSqlAccountOverViewBalance(Map<String, Object> params) {
 
-		return new StringBuilder().append("select "
+		StringBuilder sql =  new StringBuilder().append("select "
 
 		+ "null as row, " + "null as fact_acct_id, " + "null as clientname, "
 				+ "null as orgname, " + "null as account_id, "
@@ -609,15 +652,20 @@ public class PAT_Sqls {
 				+ " and c_acctschema_id = ? "
 
 				+ "group by " + "row");
+		
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+
+		return sql;		
 
 	}
 	
 
 
-	public StringBuilder getSqlBalanceOfAccountsList(Timestamp dateFrom, Timestamp dateTo) {
+	public StringBuilder getSqlBalanceOfAccountsList(Map<String, Object> params) {
 
 		
-		return new StringBuilder()
+		StringBuilder sql =  new StringBuilder()
 		
 				.append("select "
 						+ "null as row, " 
@@ -628,11 +676,11 @@ public class PAT_Sqls {
 						+ " (select value from c_elementvalue where c_elementvalue_id=f.account_id) as value,"
 						+ " (select name from c_elementvalue where c_elementvalue_id=f.account_id) as name,"
 						+ "null as datetrx," 
-						+ " (select sum(amtacctdr-amtacctcr) from fact_acct f2 where f2.dateacct < " + "'" + dateFormat.format(dateFrom)  + "'" + " and f2.account_id=f.account_id)::numeric as balance_carried_forward,"
-						+ " (select sum(f2.amtacctdr) from fact_acct f2 where f2.dateacct between  " + "'" + dateFormat.format(dateFrom)  + "'" + " and  " + "'" + dateFormat.format(dateTo)  + "'" + " and f2.account_id=f.account_id)::numeric as debit,"
-						+ " (select sum(f2.amtacctcr) from fact_acct f2 where f2.dateacct between  " + "'" + dateFormat.format(dateFrom)  + "'" + " and  " + "'" + dateFormat.format(dateTo)  + "'" + " and f2.account_id=f.account_id)::numeric as credit,"
-						+ " (select sum(f2.amtacctdr-f2.amtacctcr) from fact_acct f2 where f2.dateacct between  " + "'" + dateFormat.format(dateFrom)  + "'" + " and  " + "'" + dateFormat.format(dateTo)  + "'" + " and f2.account_id=f.account_id)::numeric as current_balance,"
-						+ " (select sum(f2.amtacctdr-f2.amtacctcr) from fact_acct f2 where f2.dateacct <=  " + "'" + dateFormat.format(dateTo)  + "'" + " and f2.account_id=f.account_id)::numeric as end_balance,"
+						+ " (select sum(amtacctdr-amtacctcr) from fact_acct f2 where f2.dateacct < " + "'" + params.get("dateFrom")  + "'" + " and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id)::numeric as balance_carried_forward,"
+						+ " (select sum(f2.amtacctdr) from fact_acct f2 where f2.dateacct between  " + "'" + params.get("dateFrom")  + "'" + " and  " + "'" + params.get("dateTo")  + "'" + " and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id)::numeric as debit,"
+						+ " (select sum(f2.amtacctcr) from fact_acct f2 where f2.dateacct between  " + "'" + params.get("dateFrom")  + "'" + " and  " + "'" + params.get("dateTo")  + "'" + " and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id)::numeric as credit,"
+						+ " (select sum(f2.amtacctdr-f2.amtacctcr) from fact_acct f2 where f2.dateacct between  " + "'" + params.get("dateFrom")  + "'" + " and  " + "'" + params.get("dateTo")  + "'" + " and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id)::numeric as current_balance,"
+						+ " (select sum(f2.amtacctdr-f2.amtacctcr) from fact_acct f2 where f2.dateacct <=  " + "'" + params.get("dateTo")  + "'" + " and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id)::numeric as end_balance,"
 						+ "null as product_description, "
 						+ "null as project_value, " 
 						+ "null as project_description, "
@@ -658,5 +706,63 @@ public class PAT_Sqls {
 						
 						+ " order by (select value from c_elementvalue where c_elementvalue_id=f.account_id)");
 		
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "), sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ")+(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ").length());
+
+		return sql;
+
 	}
+
+	public StringBuilder getSqlBalanceOfAccountsListBalance(Map<String, Object> params) {
+
+		
+		StringBuilder sql = new StringBuilder()
+		
+				.append("select "
+						+ "null as row, " 
+						+ "null as fact_acct_id, " 
+						+ "null as clientname, "
+						+ "null as orgname, "
+						+ "null as account_id, " 
+						+ "null as value,"
+						+ "null as name,"
+						+ "null as datetrx," 
+						+ "null as balance_carried_forward,"
+						+ "(select sum(f2.amtacctdr) from fact_acct f2 where f2.dateacct between  " + "'" + params.get("dateFrom")  + "'" + " and  " + "'" + params.get("dateTo")  + "'" + " and f2.ad_org_id = f.ad_org_id)::numeric as debit,"
+						+ "(select sum(f2.amtacctcr) from fact_acct f2 where f2.dateacct between  " + "'" + params.get("dateFrom")  + "'" + " and  " + "'" + params.get("dateTo")  + "'" + " and f2.ad_org_id = f.ad_org_id)::numeric as credit,"
+						+ "(select sum(f2.amtacctdr-f2.amtacctcr) from fact_acct f2 where f2.dateacct between  " + "'" + params.get("dateFrom")  + "'" + " and  " + "'" + params.get("dateTo")  + "'" + " and f2.ad_org_id = f.ad_org_id)::numeric as current_balance,"
+						+ "null as end_balance,"
+						+ "null as product_description, "
+						+ "null as project_value, " 
+						+ "null as project_description, "
+						+ "null as bpartner_value, " 
+						+ "null as bpartner_description, "
+						+ "null as salesregion, " 
+						+ "null as tablename, " 
+						+ "null as record_id "
+						
+						+ " from fact_acct f"
+
+						+ " where f.account_id in (select f2.account_id from fact_acct f2 where f2.ad_client_id = " + Env.getAD_Client_ID(Env.getCtx()) + " and f2.ad_org_id=f.ad_org_id group by f2.account_id)"
+
+						+ " and f.dateacct between ? and ? "
+
+						+ " and f.ad_client_id = (select ad_client_id from ad_client where name= ? )"
+
+						+ " and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "
+						
+						+ " and c_acctschema_id = ? "
+
+						+ " group by account_id, ad_client_id, ad_org_id "
+						
+						+ " order by (select value from c_elementvalue where c_elementvalue_id=f.account_id)");
+		
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "), sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ")+(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ").length());
+
+		return sql;
+
+	}
+
+
 }
