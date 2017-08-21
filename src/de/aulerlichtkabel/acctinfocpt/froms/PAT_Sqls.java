@@ -285,16 +285,28 @@ public class PAT_Sqls {
 
 		return new StringBuilder().append("select "
 
-		+ "1 as row," + "null as fact_acct_id," + "clientname," + "orgname,"
-				+ "account_id," + "account_value," + "account_name,"
-				+ "null as datetrx," + "f.dateacct,"
+				+ "1 as row," 
+				+ "null as fact_acct_id," 
+				+ "clientname," 
+				+ "orgname,"
+				+ "account_id," 
+				+ "account_value," 
+				+ "account_name,"
+				+ "null as datetrx," 
+				+ "f.dateacct,"
 				+ "round(sum(amtacctdr),2) as amtacctdr,"
 				+ "round(sum(amtacctcr),2) as amtacctcr,"
 				+ "round(sum(amtacctdr-amtacctcr),2) as current_balance,"
-				+ "null as product_value," + "null as product_description,"
-				+ "project_value," + "project_description," + "bpartner_value,"
-				+ "bpartner_description," + "null as description,"
-				+ "salesregion," + "tablename," + "record_id "
+				+ "null as product_value," 
+				+ "null as product_description,"
+				+ "null as project_value," 
+				+ "null as project_description," 
+				+ "null as bpartner_value,"
+				+ "null as bpartner_description," 
+				+ "null as description,"
+				+ "null as salesregion," 
+				+ "null as tablename," 
+				+ "null as record_id "
 
 				+ "from pat_facourse f "
 
@@ -309,9 +321,7 @@ public class PAT_Sqls {
 
 				+ "group by account_value," + "clientname," + "orgname,"
 				+ "account_id," + "account_value," + "account_name,"
-				+ "f.dateacct," + "project_value," + "project_description,"
-				+ "bpartner_value," + "bpartner_description," + "salesregion,"
-				+ "tablename," + "record_id"
+				+ "f.dateacct "
 				
 				+ " order by account_value");
 
