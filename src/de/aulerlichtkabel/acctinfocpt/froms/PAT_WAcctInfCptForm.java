@@ -674,8 +674,8 @@ public class PAT_WAcctInfCptForm
 					
 					if(!o.toString().equals("")){
 
-						if((cell.getValue() != null) && (c==5 || c==9))
-							cell.setValue(numberFormat.format(cell.getValue()));
+						if((cell.getLabel() != null) && (c==5 || c==9))
+							cell.setLabel(numberFormat.format(new BigDecimal(o.toString())));
 
 						try {
 
