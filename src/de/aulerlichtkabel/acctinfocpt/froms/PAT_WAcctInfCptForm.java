@@ -27,6 +27,7 @@ import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -726,7 +727,15 @@ public class PAT_WAcctInfCptForm
 			dispose();
 
 		if (event.getTarget() == dateboxDateFrom) {
-			dateboxDateTo.setValue(dateboxDateFrom.getValue());
+			
+			if(dateboxDateFrom.getValue() != null){
+				
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(dateboxDateFrom.getValue());
+				cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+				dateboxDateTo.setValue(cal.getTime());
+				
+			}
 		}
 
 		if (event.getTarget() == buttonSummaryAccountDocument) {
