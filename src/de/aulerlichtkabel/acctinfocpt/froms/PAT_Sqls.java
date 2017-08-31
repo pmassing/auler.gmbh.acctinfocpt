@@ -239,7 +239,7 @@ public class PAT_Sqls {
 						+ "tablename, "
 						+ "record_id "	
 						
-						+ "from pat_accountcourse(?,?,?,?) " + "WHERE "
+						+ "from pat_accountcourse(?,?,?,?) " + "where "
 
 				+ " clientname = ? "
 
