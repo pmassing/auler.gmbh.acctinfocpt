@@ -383,7 +383,7 @@ public class PAT_Sqls {
 
 		StringBuilder sql = new StringBuilder().append("select "
 
-				+ "row, " 
+				+ "null as row, " 
 				+ "null as fact_acct_id, " 
 				+ "clientname, " 
 				+ "orgname, "
@@ -416,12 +416,6 @@ public class PAT_Sqls {
 				+ "and orgname = ? "
 
 				+ " and c_acctschema_id = ? "
-
-				+ "group by " + "row, " + "clientname, " + "orgname, "
-				+ "account_id, " + "account_value, " + "account_name, "
-				+ "amtacctdr, " + "amtacctcr, " + "datetrx, " + "dateacct, "
-				+ "product_value, " + "project_value, " + "bpartner_value, "
-				+ "salesregion, " + "tablename "
 
 				+ "order by dateacct ");
 				

@@ -219,7 +219,7 @@ public class PAT_Data {
 
 			StringBuilder sqlApx = new StringBuilder();
 
-			sqlApx.append("");
+			sqlApx.append(" 1 = 1 ");
 
 			if (params.get("product_id") != null) {
 
@@ -241,7 +241,9 @@ public class PAT_Data {
 				sqlApx.append(" and c_project_id = ? ");
 			}
 
-			sql.insert(sql.indexOf("group by", 0), sqlApx);
+			sqlApx.append(" and ");
+			
+			sql.insert(sql.indexOf("where ")+6, sqlApx);
 
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			// System.out.println(sql);
@@ -390,7 +392,7 @@ public class PAT_Data {
 						row.add(rs.getString(13));
 				
 					if (rs.getObject(13) instanceof BigDecimal)				
-						row.add(rs.getBigDecimal(13));
+						row.add(numberFormat.format(rs.getBigDecimal(13)));
 
 				}
 				else
