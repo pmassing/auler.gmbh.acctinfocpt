@@ -23,7 +23,6 @@
 package de.aulerlichtkabel.acctinfocpt.froms;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -192,7 +191,6 @@ public class PAT_Data {
 		List<MOrg> list = new Query(Env.getCtx(), MOrg.Table_Name, "AD_Client_ID=?", null)
 				.setParameters(Env.getAD_Client_ID(Env.getCtx())).setOrderBy(MOrg.COLUMNNAME_Name).list();
 
-		// TODO:Check of null
 		return list.toArray(new MOrg[list.size()]);
 
 	}

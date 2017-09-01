@@ -22,9 +22,11 @@
 
 package de.aulerlichtkabel.acctinfocpt.froms;
 
+
 import java.util.Map;
 
 import org.compiere.util.Env;
+
 
 public class PAT_Sqls {
 	
@@ -64,15 +66,19 @@ public class PAT_Sqls {
 
 						+ "from pat_facourse "
 
-						+ "where account_value between ? and ? "
+						+ " left join c_period p on p.c_period_id = pat_facourse.c_period_id and p.ad_client_id = pat_facourse.ad_client_id "
 
-						+ "and clientname = ? "
+						+ " where account_value between ? and ? "
+
+						+ " and clientname = ? "
 
 						+ " and orgname = ? "
 
 						+ " and c_acctschema_id = ? "
 
-						+ "group by "
+						+ " and p.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "' "
+
+						+ " group by "
 
 						+ "clientname,"
 						+ "orgname,"
@@ -124,15 +130,19 @@ public class PAT_Sqls {
 
 						+ "from pat_facourse "
 
-						+ "where account_value between ? and ?  and dateacct between ? and ? "
+						+ " left join c_period p on p.c_period_id = pat_facourse.c_period_id and p.ad_client_id = pat_facourse.ad_client_id "
 
-						+ "and clientname = ? "
+						+ " where account_value between ? and ?  and dateacct between ? and ? "
+
+						+ " and clientname = ? "
 
 						+ " and orgname = ? "
 
 						+ " and c_acctschema_id = ? "
 
-						+ "group by "
+						+ " and p.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "'"
+
+						+ " group by "
 
 						+ "clientname,"
 						+ "orgname,"
@@ -183,15 +193,19 @@ public class PAT_Sqls {
 
 						+ "from pat_facourse "
 
-						+ "where account_value between ? and ?  and dateacct between ? and ? "
+						+ " left join c_period p on p.c_period_id = pat_facourse.c_period_id and p.ad_client_id = pat_facourse.ad_client_id "
 
-						+ "and clientname = ? "
+						+ " where account_value between ? and ?  and dateacct between ? and ? "
+
+						+ " and clientname = ? "
 
 						+ " and orgname = ? "
 
 						+ " and c_acctschema_id = ? "
 
-						+ "group by "
+					+ " and p.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "'"
+
+					+ " group by "
 
 						+ "clientname,"
 						+ "orgname,"
@@ -239,15 +253,17 @@ public class PAT_Sqls {
 						+ "tablename, "
 						+ "record_id "	
 						
-						+ "from pat_accountcourse(?,?,?,?) " + "where "
+						+ "from pat_accountcourse(?,?,?,?," + "'" + params.get("isWithAdjustmentPeriod").toString() + "'" + ") " 
+						
+						+ "where "
 
-				+ " clientname = ? "
+						+ " clientname = ? "
 
-				+ " and orgname = ? "
+						+ " and orgname = ? "
 
-				+ " and c_acctschema_id = ? "
+						+ " and c_acctschema_id = ? "
 
-				+ "group by " 
+						+ " group by " 
 				
 						+ "row, "
 						+ "fact_acct_id, "
@@ -356,9 +372,13 @@ public class PAT_Sqls {
 
 						+ "from fact_acct f "
 
-						+ "where f.account_id in (select account_id from fact_acct where ad_client_id ="
-						+ Env.getAD_Client_ID(Env.getCtx())
-						+ " )"
+						+ " left join c_period p on p.c_period_id = f.c_period_id and p.ad_client_id = f.ad_client_id "
+
+						+ " where f.account_id in "
+						+ "       (select account_id from fact_acct where ad_client_id ="
+						+           Env.getAD_Client_ID(Env.getCtx())
+						+ "       )"
+						
 						+ " and dateacct between ? and ? "
 
 						+ " and f.ad_client_id = (select ad_client_id from ad_client where name= ? ) "
@@ -367,7 +387,10 @@ public class PAT_Sqls {
 
 						+ " and f.c_acctschema_id = ? "
 						
+						+ " and p.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "'"
+
 						+ "group by "
+						
 						+ "f.account_id,f.ad_client_id,f.ad_org_id "
 
 						+ "order by (select value from c_elementvalue e where e.c_elementvalue_id = f.account_id)");
@@ -407,15 +430,19 @@ public class PAT_Sqls {
 
 				+ "from pat_facourse "
 
-				+ "where account_value = ? "
+				+ " left join c_period p on p.c_period_id = pat_facourse.c_period_id and p.ad_client_id = pat_facourse.ad_client_id "
 
-				+ "and dateacct between ? and ? "
+				+ " where account_value = ? "
 
-				+ "and clientname = ? "
+				+ " and dateacct between ? and ? "
 
-				+ "and orgname = ? "
+				+ " and clientname = ? "
+
+				+ " and orgname = ? "
 
 				+ " and c_acctschema_id = ? "
+
+				+ " and p.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "'"
 
 				+ "order by dateacct ");
 				
@@ -428,7 +455,6 @@ public class PAT_Sqls {
 
 	public StringBuilder getSqlBalanceOfAccountsList(Map<String, Object> params) {
 
-		
 		StringBuilder sql =  new StringBuilder()
 		
 				.append("select "
@@ -440,11 +466,51 @@ public class PAT_Sqls {
 						+ " (select value from c_elementvalue where c_elementvalue_id=f.account_id) as value,"
 						+ " (select name from c_elementvalue where c_elementvalue_id=f.account_id) as name,"
 						+ "null as datetrx," 
-						+ " (select sum(amtacctdr-amtacctcr) from fact_acct f2 where f2.dateacct < " + "'" + params.get("dateFrom")  + "'" + " and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id)::numeric as balance_carried_forward,"
-						+ " (select sum(f2.amtacctdr) from fact_acct f2 where f2.dateacct between  " + "'" + params.get("dateFrom")  + "'" + " and  " + "'" + params.get("dateTo")  + "'" + " and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id)::numeric as debit,"
-						+ " (select sum(f2.amtacctcr) from fact_acct f2 where f2.dateacct between  " + "'" + params.get("dateFrom")  + "'" + " and  " + "'" + params.get("dateTo")  + "'" + " and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id)::numeric as credit,"
-						+ " (select sum(f2.amtacctdr-f2.amtacctcr) from fact_acct f2 where f2.dateacct between  " + "'" + params.get("dateFrom")  + "'" + " and  " + "'" + params.get("dateTo")  + "'" + " and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id)::numeric as current_balance,"
-						+ " (select sum(f2.amtacctdr-f2.amtacctcr) from fact_acct f2 where f2.dateacct <=  " + "'" + params.get("dateTo")  + "'" + " and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id)::numeric as end_balance,"
+						
+						+ " ("
+						+ "    select sum(amtacctdr-amtacctcr) "
+						+ "      from fact_acct f2"		
+						+ "       left join c_period p2 on p2.c_period_id = f2.c_period_id and p2.ad_client_id = f2.ad_client_id"						
+						+ "      where f2.dateacct < " + "'" + params.get("dateFrom")  + "'" 
+						+ "            and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id "
+						+ "            and p2.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "'"
+						+ " )::numeric as balance_carried_forward,"
+
+						
+						+ " ("
+						+ "    select sum(f2.amtacctdr) "
+						+ "      from fact_acct f2"
+						+ "       left join c_period p2 on p2.c_period_id = f2.c_period_id and p2.ad_client_id = f2.ad_client_id"												
+						+ "      where f2.dateacct between  " + "'" + params.get("dateFrom")  + "'" + " and  " + "'" + params.get("dateTo")  + "'" 
+						+ "            and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id"
+						+ "            and p2.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "'"
+						+ " )::numeric as debit,"
+						
+						
+						+ " (select sum(f2.amtacctcr) from fact_acct f2"
+						+ "       left join c_period p2 on p2.c_period_id = f2.c_period_id and p2.ad_client_id = f2.ad_client_id"												
+						+ "      where f2.dateacct between  " + "'" + params.get("dateFrom")  + "'" + " and  " + "'" + params.get("dateTo")  + "'" 
+						+ "            and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id"
+						+ "            and p2.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "'"
+						+ " )::numeric as credit,"
+
+						
+						+ " (select sum(f2.amtacctdr-f2.amtacctcr) from fact_acct f2"
+						+ "       left join c_period p2 on p2.c_period_id = f2.c_period_id and p2.ad_client_id = f2.ad_client_id"												
+						+ "      where f2.dateacct between  " + "'" + params.get("dateFrom")  + "'" + " and  " + "'" + params.get("dateTo")  + "'" 
+						+ "            and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id"
+						+ "            and p2.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "'"
+						+ " )::numeric as current_balance,"
+
+						
+						+ " (select sum(f2.amtacctdr-f2.amtacctcr) from fact_acct f2"
+						+ "       left join c_period p2 on p2.c_period_id = f2.c_period_id and p2.ad_client_id = f2.ad_client_id"												
+						+ "      where f2.dateacct <=  " + "'" + params.get("dateTo")  + "'" 
+						+ "            and f2.account_id=f.account_id and f2.ad_org_id = f.ad_org_id"
+						+ "            and p2.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "'"
+						+ " )::numeric as end_balance,"
+
+						
 						+ "null as product_description, "
 						+ "null as project_value, " 
 						+ "null as project_description, "
@@ -454,7 +520,9 @@ public class PAT_Sqls {
 						+ "null as tablename, " 
 						+ "null as record_id "
 						
-						+ " from fact_acct f"
+						+ " from fact_acct f "
+						
+						+ " left join c_period p on p.c_period_id = f.c_period_id and p.ad_client_id = f.ad_client_id"
 
 						+ " where f.account_id in (select f2.account_id from fact_acct f2 where f2.ad_client_id = " + Env.getAD_Client_ID(Env.getCtx()) + " group by f2.account_id)"
 
@@ -464,9 +532,11 @@ public class PAT_Sqls {
 
 						+ " and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "
 						
-						+ " and c_acctschema_id = ? "
-
-						+ " group by account_id, ad_client_id, ad_org_id "
+						+ " and f.c_acctschema_id = ? "
+						
+						+ " and p.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "'"
+						
+						+ " group by account_id, f.ad_client_id, f.ad_org_id "
 						
 						+ " order by (select value from c_elementvalue where c_elementvalue_id=f.account_id)");
 		

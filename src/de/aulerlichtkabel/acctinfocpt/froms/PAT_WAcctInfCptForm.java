@@ -124,6 +124,7 @@ public class PAT_WAcctInfCptForm
 	Row rowCheckbox = rows.newRow();
 	Row rowClientAndOrg = rows.newRow();
 	Row rowAcctSchema = rows.newRow();	
+	Row rowAdjustmentPeriod = rows.newRow();
 	Row rowAccountDocument = rows.newRow();
 	Row rowDate = rows.newRow();
 	Row rowAcctValue = rows.newRow();
@@ -147,6 +148,9 @@ public class PAT_WAcctInfCptForm
 
 	private Label labelDateTo = new Label();
 	private Datebox dateboxDateTo = new Datebox();
+	
+	private Label labelWithAdjustmentPeriod = new Label();
+	private Listbox listboxWithAdjustmentPeriod= ListboxFactory.newDropdownListbox();
 
 	private Label labelValueFrom = new Label();
 	private WSearchEditor searchEditorValueFrom;
@@ -338,7 +342,13 @@ public class PAT_WAcctInfCptForm
 		dateboxDateFrom.addEventListener(Events.ON_CHANGE, this);
 
 		labelDateTo.setValue(Msg.translate(Env.getCtx(), "DateTo"));
-
+		
+		labelWithAdjustmentPeriod.setValue(Msg.translate(Env.getCtx(), "Period Type"));
+		listboxWithAdjustmentPeriod.appendItem(Msg.translate(Env.getCtx(),"*"), "%");
+		listboxWithAdjustmentPeriod.appendItem(Msg.translate(Env.getCtx(),"Standard Period"), "S");
+		listboxWithAdjustmentPeriod.appendItem(Msg.translate(Env.getCtx(),"Adjustment Period"), "A");
+		
+		
 		labelValueFrom.setValue(Msg.translate(Env.getCtx(), "ValueFrom"));
 		searchEditorValueFrom.addValueChangeListener(this);
 
@@ -378,12 +388,16 @@ public class PAT_WAcctInfCptForm
 		rowClientAndOrg.appendChild(textboxClient);
 		rowClientAndOrg.appendChild(labelOrganisation);
 		rowClientAndOrg.appendChild(listboxOrganisation);
+		rowClientAndOrg.appendChild(new Space());
 		
 		rowAcctSchema.appendChild(labelAcctSchema);
 		rowAcctSchema.appendChild(listboxSelAcctSchema);
 		rowAcctSchema.appendChild(new Space());
 		rowAcctSchema.appendChild(new Space());
 
+		rowAdjustmentPeriod.appendChild(labelWithAdjustmentPeriod);
+		rowAdjustmentPeriod.appendChild(listboxWithAdjustmentPeriod);
+		
 		rowAccountDocument.appendChild(listboxSummaryTable);
 		rowAccountDocument.appendChild(labelSummaryAccountDocument);
 		rowAccountDocument.appendChild(buttonSummaryAccountDocument);
@@ -419,6 +433,7 @@ public class PAT_WAcctInfCptForm
 		rowCheckbox.setVisible(false);
 		rowClientAndOrg.setVisible(false);
 		rowAcctSchema.setVisible(false);
+		rowAdjustmentPeriod.setVisible(false);
 		rowAccountDocument.setVisible(false);
 		rowAcctValue.setVisible(false);
 		rowDate.setVisible(false);
@@ -431,6 +446,7 @@ public class PAT_WAcctInfCptForm
 
 		dateboxDateFrom.setValue(null);
 		dateboxDateTo.setValue(null);
+		listboxWithAdjustmentPeriod.setSelectedIndex(0);
 		searchEditorValueFrom.setValue(null);
 		searchEditorValueTo.setValue(null);
 		checkboxOnYear.setChecked(false);
@@ -450,6 +466,7 @@ public class PAT_WAcctInfCptForm
 
 		params.put("organisation", listboxOrganisation.getSelectedItem().getLabel());
 		params.put("acctschema", listboxSelAcctSchema.getSelectedItem().getValue());
+		params.put("isWithAdjustmentPeriod", listboxWithAdjustmentPeriod.getSelectedItem());		
 		params.put("valueFrom", searchEditorValueFrom.getValue());
 		params.put("valueTo", searchEditorValueTo.getValue());
 		params.put("dateFrom", dateboxDateFrom.getValue());
@@ -766,7 +783,8 @@ public class PAT_WAcctInfCptForm
 			rowDate.setVisible(true);
 			rowDimension.setVisible(false);
 			rowDimension2.setVisible(false);
-
+			rowAdjustmentPeriod.setVisible(true);
+			
 			tabBox.setSelectedIndex(0);
 
 			tabResult.setLabel(Msg.getMsg(Env.getCtx(), "Result").replaceAll("[&]", "") + " - "
@@ -797,6 +815,7 @@ public class PAT_WAcctInfCptForm
 			rowDate.setVisible(false);
 			rowDimension.setVisible(false);
 			rowDimension2.setVisible(false);
+			rowAdjustmentPeriod.setVisible(true);
 
 			tabBox.setSelectedIndex(0);
 
@@ -828,6 +847,7 @@ public class PAT_WAcctInfCptForm
 			rowDate.setVisible(true);
 			rowDimension.setVisible(true);
 			rowDimension2.setVisible(true);
+			rowAdjustmentPeriod.setVisible(true);
 
 			tabBox.setSelectedIndex(0);
 
@@ -859,6 +879,7 @@ public class PAT_WAcctInfCptForm
 			rowDate.setVisible(false);
 			rowDimension.setVisible(false);
 			rowDimension2.setVisible(false);
+			rowAdjustmentPeriod.setVisible(false);
 
 			tabBox.setSelectedIndex(0);
 
@@ -891,6 +912,7 @@ public class PAT_WAcctInfCptForm
 			rowDate.setVisible(false);
 			rowDimension.setVisible(false);
 			rowDimension2.setVisible(false);
+			rowAdjustmentPeriod.setVisible(true);
 
 			tabBox.setSelectedIndex(0);
 
@@ -925,6 +947,7 @@ public class PAT_WAcctInfCptForm
 			rowDate.setVisible(true);
 			rowDimension.setVisible(false);
 			rowDimension2.setVisible(false);
+			rowAdjustmentPeriod.setVisible(true);
 
 			tabBox.setSelectedIndex(0);
 
@@ -1042,6 +1065,7 @@ public class PAT_WAcctInfCptForm
 
 		params.put("organisation", listboxOrganisation.getSelectedItem().getLabel());
 		params.put("acctschema", listboxSelAcctSchema.getSelectedItem().getValue());
+		params.put("isWithAdjustmentPeriod", listboxWithAdjustmentPeriod.getSelectedItem());		
 		params.put("valueFrom", valueFrom.toString());
 		params.put("valueTo", valueTo.toString());
 		params.put("dateFrom", tDateFrom);
@@ -1093,6 +1117,7 @@ public class PAT_WAcctInfCptForm
 
 		params.put("organisation", listboxOrganisation.getSelectedItem().getLabel());
 		params.put("acctschema", listboxSelAcctSchema.getSelectedItem().getValue());
+		params.put("isWithAdjustmentPeriod", listboxWithAdjustmentPeriod.getSelectedItem());		
 		params.put("valueFrom", "");
 		params.put("valueTo", "");
 		params.put("dateFrom", tDateFrom);
@@ -1133,6 +1158,7 @@ public class PAT_WAcctInfCptForm
 
 		params.put("organisation", listboxOrganisation.getSelectedItem().getLabel());
 		params.put("acctschema", listboxSelAcctSchema.getSelectedItem().getValue());
+		params.put("isWithAdjustmentPeriod", listboxWithAdjustmentPeriod.getSelectedItem());		
 		params.put("valueFrom", valueFrom.toString());
 		params.put("valueTo", "");
 		params.put("dateFrom", tDateFrom);
@@ -1164,6 +1190,7 @@ public class PAT_WAcctInfCptForm
 
 		params.put("organisation", listboxOrganisation.getSelectedItem().getLabel());
 		params.put("acctschema", listboxSelAcctSchema.getSelectedItem().getValue());
+		params.put("isWithAdjustmentPeriod", listboxWithAdjustmentPeriod.getSelectedItem());		
 		params.put("valueFrom", valueFrom.toString());
 		params.put("valueTo", valueTo.toString());
 		params.put("dateFrom", new Timestamp(0));
@@ -1209,6 +1236,7 @@ public class PAT_WAcctInfCptForm
 
 		params.put("organisation", listboxOrganisation.getSelectedItem().getLabel());
 		params.put("acctschema", listboxSelAcctSchema.getSelectedItem().getValue());
+		params.put("isWithAdjustmentPeriod", listboxWithAdjustmentPeriod.getSelectedItem());		
 		params.put("valueFrom", valueFrom.toString());
 		params.put("valueTo", valueTo.toString());
 		params.put("dateFrom", tDateFrom);
@@ -1256,6 +1284,7 @@ public class PAT_WAcctInfCptForm
 
 		params.put("organisation", listboxOrganisation.getSelectedItem().getLabel());
 		params.put("acctschema", listboxSelAcctSchema.getSelectedItem().getValue());
+		params.put("isWithAdjustmentPeriod", listboxWithAdjustmentPeriod.getSelectedItem());		
 		params.put("valueFrom", valueFrom.toString());
 		params.put("valueTo", valueTo.toString());
 		params.put("dateFrom", tDateFrom);
@@ -1326,6 +1355,7 @@ public class PAT_WAcctInfCptForm
 
 		params.put("organisation", listboxOrganisation.getSelectedItem().getLabel());
 		params.put("acctschema", listboxSelAcctSchema.getSelectedItem().getValue());
+		params.put("isWithAdjustmentPeriod", listboxWithAdjustmentPeriod.getSelectedItem());		
 		params.put("valueFrom", "");
 		params.put("valueTo", "");
 		params.put("dateFrom", tDateFrom);
