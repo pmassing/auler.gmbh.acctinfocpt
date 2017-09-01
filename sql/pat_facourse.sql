@@ -51,7 +51,9 @@ select
        bp.c_bpartner_id,
        sr.c_salesregion_id,
        proj.c_project_id,
-       fa.c_acctschema_id
+       fa.c_acctschema_id,
+       fa.ad_client_id,
+       fa.c_period_id
        
        
        
