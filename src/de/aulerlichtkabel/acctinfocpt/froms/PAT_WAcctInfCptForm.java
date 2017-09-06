@@ -243,7 +243,7 @@ public class PAT_WAcctInfCptForm
 		MLookup projectVaL = MLookupFactory.get(Env.getCtx(), mForm.getWindowNo(), 0, 1349, DisplayType.Search);
 		searchEditorProject = new WSearchEditor("C_Project_ID", false, false, true, projectVaL);
 
-		LayoutUtils.addSclass("Document Management", mForm);
+		LayoutUtils.addSclass("AccountInfoCockpit", mForm);
 
 		mForm.appendChild(layout);
 
