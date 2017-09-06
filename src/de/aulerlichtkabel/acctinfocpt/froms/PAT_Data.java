@@ -27,7 +27,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -205,9 +204,6 @@ public class PAT_Data {
 
 		List<List<Object>> rows = new ArrayList<List<Object>>();
 
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM,
-				Env.getLanguage(Env.getCtx()).getLocale());
-
 		DecimalFormat numberFormat = DisplayType.getNumberFormat(DisplayType.Amount);
 
 		PreparedStatement pstmt = null;
@@ -350,7 +346,7 @@ public class PAT_Data {
 				if (rs.getObject(9) != null){
 					
 					if (rs.getObject(9) instanceof Timestamp)
-						row.add(dateFormat.format(rs.getTimestamp(9)));
+						row.add(Env.getLanguage(Env.getCtx()).getDateFormat().format(rs.getTimestamp(9)));
 				
 					if (rs.getObject(9) instanceof BigDecimal)
 						row.add(numberFormat.format(rs.getBigDecimal(9)));

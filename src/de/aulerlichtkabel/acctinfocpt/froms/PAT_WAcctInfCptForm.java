@@ -24,7 +24,6 @@ package de.aulerlichtkabel.acctinfocpt.froms;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -218,11 +217,6 @@ public class PAT_WAcctInfCptForm
 	private boolean isTreeSummary = false;
 	
 	Map<String, Object> params = new HashMap<String, Object>();
-	
-	
-	DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM,
-			Env.getLanguage(Env.getCtx()).getLocale());
-	
 	
 
 	/** Logger */
@@ -632,6 +626,7 @@ public class PAT_WAcctInfCptForm
 		for (String column : columns) {
 
 			ListHeader lstclolumn = new ListHeader();
+			
 			lstclolumn.setLabel(Msg.getMsg(Env.getCtx(), column));
 			if (column.equals("DateAcct") || column.equals("Debit") || column.equals("Credit")
 					|| column.equals("Balance"))
@@ -643,6 +638,7 @@ public class PAT_WAcctInfCptForm
 		return listhead;
 
 	}
+	
 
 	private void setLabelOfColumn(int pos, String label){
 		
@@ -761,7 +757,7 @@ public class PAT_WAcctInfCptForm
 				}
 				
 			}			
-
+			
 			item.appendChild(cell);
 			c++;
 		}
@@ -824,7 +820,8 @@ public class PAT_WAcctInfCptForm
 				dateboxDateTo.setEnabled(false);
 
 		}
-
+		
+		
 		if (event.getTarget() == buttonSummaryAccountDocument) {
 
 			p_data.getDocument(this.m_WindowNo, listboxSummaryTable.getSelectedItem().getLabel(),
@@ -845,7 +842,7 @@ public class PAT_WAcctInfCptForm
 			isSummary = false;
 			isBalanceOfAccountsList = false;
 			isTreeSummary = false;
-
+			
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(true);
 			rowAcctSchema.setVisible(true);
@@ -1069,6 +1066,9 @@ public class PAT_WAcctInfCptForm
 
 		}
 
+		
+		
+		
 		if (event.getTarget() == checkboxOnYear) {
 			setCheckboxOnYear();
 		}
@@ -1639,8 +1639,6 @@ public class PAT_WAcctInfCptForm
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(dateboxDateFrom.getValue());
-
-		 dateFormat.format(dateboxDateFrom.getValue().getTime());
 		
 
 		for (int month= cal.get(Calendar.MONTH); month <= 12; month++ ){
@@ -1669,8 +1667,6 @@ public class PAT_WAcctInfCptForm
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(dateboxDateFrom.getValue());
 
-		dateFormat.format(dateboxDateFrom.getValue().getTime());
-
 		for (int day = cal.get(Calendar.DAY_OF_MONTH); day <= cal
 				.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
 
@@ -1698,7 +1694,7 @@ public class PAT_WAcctInfCptForm
 			if (checkboxOnMonth.isChecked()) {
 
 				Calendar cal = Calendar.getInstance();
-				cal.setTime(dateFormat.parse((String)obj.get(4)));
+				cal.setTime(Env.getLanguage(Env.getCtx()).getDateFormat().parse((String)obj.get(4)));
 
 				
 				setCell(cal.get(Calendar.MONTH)+1, item,(String)obj.get(7));
@@ -1708,7 +1704,7 @@ public class PAT_WAcctInfCptForm
 			if (checkboxOnDay.isChecked()) {
 
 				Calendar cal = Calendar.getInstance();
-				cal.setTime(dateFormat.parse((String)obj.get(4)));
+				cal.setTime(Env.getLanguage(Env.getCtx()).getDateFormat().parse((String)obj.get(4)));
 
 				
 				setCell(cal.get(Calendar.DAY_OF_MONTH)+1, item,(String)obj.get(7));
@@ -1722,7 +1718,7 @@ public class PAT_WAcctInfCptForm
 					createEmptyColumns(1);
 				
 				Calendar cal = Calendar.getInstance();
-				cal.setTime(dateFormat.parse((String)obj.get(4)));
+				cal.setTime(Env.getLanguage(Env.getCtx()).getDateFormat().parse((String)obj.get(4)));
 				
 				if(cal.get(Calendar.YEAR)< sortYear)
 					sortYear--;
@@ -1755,7 +1751,6 @@ public class PAT_WAcctInfCptForm
 							else
 								((ListCell) cell).setStyle("font-weight: bold;text-align: right");
 						} catch (ParseException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					
