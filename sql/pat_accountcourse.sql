@@ -1,8 +1,8 @@
-﻿-- Function: pat_accountcourse(character varying, character varying, date, date)
+-- Function: pat_accountcourse(character varying, character varying, date, date)
 
 -- DROP FUNCTION pat_accountcourse(character varying, character varying, date, date, character varying);
 
-CREATE OR REPLACE FUNCTION pat_accountcourse(accountfrom character varying, accountto character varying, datefrom date, dateto date, periodtype character varying)
+CREATE OR REPLACE FUNCTION pat_accountcourse(accountfrom character varying, accountto character varying, datefrom date, dateto date, period_type character varying)
   RETURNS SETOF pat_facourse AS
 $BODY$
 /******************************************************************************
@@ -54,7 +54,7 @@ BEGIN
     				where account_value=accountfrom 
     						and account_value=accountto 
     						and dateacct<datefrom
-    						and p.periodtype like periodtype;
+    						and p.periodtype like period_type;
 
     SELECT INTO count count(fact_acct_id) from  pat_facourse fac 
     
@@ -64,7 +64,7 @@ BEGIN
                     		and account_value=accountto 
                     		and dateacct>=datefrom 
                     		and dateacct<=dateto
-    						and p.periodtype like periodtype;
+    						and p.periodtype like period_type;
 
 
                     		
@@ -85,7 +85,7 @@ BEGIN
                     		and account_value=accountto 
                     		and dateacct>=datefrom 
                     		and dateacct<=dateto
-     						and p.periodtype like periodtype
+     						and p.periodtype like period_type
                    
                     order by fac.account_id, fac.dateacct, fac.fact_acct_id
                     

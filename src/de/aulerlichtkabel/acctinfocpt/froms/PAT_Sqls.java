@@ -547,4 +547,203 @@ public class PAT_Sqls {
 
 	}
 
+	public StringBuilder getSqlTreeOnYear(Map<String, Object> params) {
+
+		StringBuilder sql = new StringBuilder()
+				.append("select "
+						+ "1 as row,"
+						+ "null as fact_acct_id,"
+						+ "clientname,"
+						+ "orgname,"
+						+ "null as account_id,"
+						+ "null as account_value,"
+						+ "null as account_name,"
+						+ "null as datetrx,"
+						+ "(date_trunc('month'::text, "
+						+ "firstof(dateacct::timestamp with time zone, 'YY'::character varying)"
+						+ "::timestamp with time zone) + 12::double precision * '1 mon'::interval - 1::numeric)::timestamp "
+						+ "AS dateacct,"
+						+ "null as amtacctdr,"
+						+ "null as amtacctcr,"
+						+ "round(sum(amtacctdr-amtacctcr),2),"
+						+ "null as product_value,"
+						+ "null as product_description,"
+						+ "null as project_value,"
+						+ "null as project_description,"
+						+ "null as bpartner_value,"
+						+ "null as bpartner_description,"
+						+ "null as description,"
+						+ "null as salesregion,"
+						+ "null as tablename "
+
+						+ "from pat_facourse "
+
+						+ " left join c_period p on p.c_period_id = pat_facourse.c_period_id and p.ad_client_id = pat_facourse.ad_client_id "
+
+						+ " where " + params.get("treeSummary")
+
+						+ " and clientname = ? "
+
+						+ " and orgname = ? "
+
+						+ " and c_acctschema_id = ? "
+
+						+ " and p.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "' "
+
+						+ " group by "
+
+						+ "clientname,"
+						+ "orgname,"
+
+						+ "date_trunc('month'::text, "
+						+ "firstof(dateacct::timestamp with time zone, 'YY'::character varying)"
+						+ "::timestamp with time zone) + 12::double precision * '1 mon'::interval - 1::numeric "
+
+						+ "Order by "
+						
+						+ "date_trunc('month'::text, "
+						+ "firstof(dateacct::timestamp with time zone, 'YY'::character varying)"
+						+ "::timestamp with time zone) + 12::double precision * '1 mon'::interval - 1::numeric "
+
+						);
+
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+
+		return sql;
+
+	}
+	
+	public StringBuilder getSqlTreeOnMonth(Map<String, Object> params) {
+
+		StringBuilder sql = new StringBuilder()
+				.append("select "
+						+ "1 as row,"
+						+ "null as fact_acct_id,"
+						+ "clientname,"
+						+ "orgname,"
+						+ "null as account_id,"
+						+ "null as account_value,"
+						+ "null as account_name,"
+						+ "null as datetrx,"
+						+ "(date_trunc('month'::text, "
+						+ "firstof(dateacct::timestamp with time zone, 'MM'::character varying)"
+						+ "::timestamp with time zone) + 1::double precision * '1 mon'::interval - 1::numeric)::timestamp "
+						+ "AS dateacct,"
+						+ "null as amtacctdr,"
+						+ "null as amtacctcr,"
+						+ "round(sum(amtacctdr-amtacctcr),2),"
+						+ "null as product_value,"
+						+ "null as product_description,"
+						+ "null as project_value,"
+						+ "null as project_description,"
+						+ "null as bpartner_value,"
+						+ "null as bpartner_description,"
+						+ "null as description,"
+						+ "null as salesregion,"
+						+ "null as tablename "
+
+						+ "from pat_facourse "
+
+						+ " left join c_period p on p.c_period_id = pat_facourse.c_period_id and p.ad_client_id = pat_facourse.ad_client_id "
+
+						+ " where " + params.get("treeSummary")
+
+						+ " and dateacct between ? and ? "
+						
+						+ " and clientname = ? "
+
+						+ " and orgname = ? "
+
+						+ " and c_acctschema_id = ? "
+
+						+ " and p.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "' "
+
+						+ " group by "
+
+						+ "clientname,"
+						+ "orgname,"
+
+						+ "(date_trunc('month'::text, "
+						+ "firstof(dateacct::timestamp with time zone, 'MM'::character varying)"
+						+ "::timestamp with time zone) + 1::double precision * '1 mon'::interval - 1::numeric)::timestamp "
+
+
+
+						+ "Order by "
+						
+						+ "(date_trunc('month'::text, "
+						+ "firstof(dateacct::timestamp with time zone, 'MM'::character varying)"
+						+ "::timestamp with time zone) + 1::double precision * '1 mon'::interval - 1::numeric)::timestamp "
+
+						);
+
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+
+		return sql;
+
+	}
+
+	public StringBuilder getSqlTreeOnDay(Map<String, Object> params) {
+
+		StringBuilder sql = new StringBuilder()
+				.append("select "
+						+ "1 as row,"
+						+ "null as fact_acct_id,"
+						+ "clientname,"
+						+ "orgname,"
+						+ "null as account_id,"
+						+ "null as account_value,"
+						+ "null as account_name,"
+						+ "null as datetrx,"
+						+ "firstof(dateacct::timestamp with time zone, 'DD'::character varying)::timestamp AS dateacct,"
+						+ "null as amtacctdr,"
+						+ "null as amtacctcr,"
+						+ "round(sum(amtacctdr-amtacctcr),2),"
+						+ "null as product_value,"
+						+ "null as product_description,"
+						+ "null as project_value,"
+						+ "null as project_description,"
+						+ "null as bpartner_value,"
+						+ "null as bpartner_description,"
+						+ "null as description,"
+						+ "null as salesregion,"
+						+ "null as tablename "
+
+						+ "from pat_facourse "
+
+						+ " left join c_period p on p.c_period_id = pat_facourse.c_period_id and p.ad_client_id = pat_facourse.ad_client_id "
+
+						+ " where " + params.get("treeSummary")
+
+						+ " and dateacct between ? and ? "
+						
+						+ " and clientname = ? "
+
+						+ " and orgname = ? "
+
+						+ " and c_acctschema_id = ? "
+
+						+ " and p.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "' "
+
+						+ " group by "
+
+						+ "clientname,"
+						+ "orgname,"
+
+						+ "firstof(dateacct::timestamp with time zone, 'DD'::character varying)::timestamp "
+
+						+ "Order by "
+						
+						+ "firstof(min(dateacct)::timestamp with time zone, 'DD'::character varying)::timestamp "
+
+						);
+
+		if(((String) params.get("organisation")).equals("*"))
+			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+
+		return sql;
+
+	}
 }

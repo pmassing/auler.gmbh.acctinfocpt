@@ -24,11 +24,13 @@ package de.aulerlichtkabel.acctinfocpt.froms;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,9 +69,16 @@ import org.adempiere.webui.panel.IFormController;
 import org.adempiere.webui.session.SessionManager;
 import org.adempiere.webui.theme.ThemeManager;
 import org.adempiere.webui.window.FDialog;
+import org.compiere.model.MAcctSchemaElement;
+import org.compiere.model.MElementValue;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MOrg;
+import org.compiere.model.MTree;
+import org.compiere.model.MTreeNode;
+import org.compiere.model.MTree_Base;
+import org.compiere.model.Query;
+import org.compiere.report.MReportTree;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
@@ -80,6 +89,7 @@ import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Center;
+import org.zkoss.zul.Frozen;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.Vbox;
@@ -111,11 +121,14 @@ public class PAT_WAcctInfCptForm
 	private ToolBarButton tButtonSummaryDocument = new ToolBarButton();
 	private ToolBarButton tButtonSummary = new ToolBarButton();
 	private ToolBarButton tBalanceOfAccountsList = new ToolBarButton();
+	private ToolBarButton tButtonTreeSummary = new ToolBarButton();
 
 	Vbox vBox = new Vbox();
 
 	Listbox listboxResult = new Listbox();
 	Borderlayout layout = new Borderlayout();
+
+	Frozen frozen = new Frozen();
 
 	private Panel parameterPanel = new Panel();
 	private Grid parameterLayout = GridFactory.newGridLayout();
@@ -202,8 +215,15 @@ public class PAT_WAcctInfCptForm
 	private boolean isSummaryDocument = false;
 	private boolean isSummary = false;
 	private boolean isBalanceOfAccountsList = false;
+	private boolean isTreeSummary = false;
 	
 	Map<String, Object> params = new HashMap<String, Object>();
+	
+	
+	DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM,
+			Env.getLanguage(Env.getCtx()).getLocale());
+	
+	
 
 	/** Logger */
 	public static CLogger log = CLogger.getCLogger(PAT_WAcctInfCptForm.class);
@@ -242,7 +262,10 @@ public class PAT_WAcctInfCptForm
 		labelProject.setValue(Msg.translate(Env.getCtx(), "Project"));
 		MLookup projectVaL = MLookupFactory.get(Env.getCtx(), mForm.getWindowNo(), 0, 1349, DisplayType.Search);
 		searchEditorProject = new WSearchEditor("C_Project_ID", false, false, true, projectVaL);
-
+		
+		listboxResult.setSizedByContent(true);
+		listboxResult.appendChild(frozen);
+		
 		LayoutUtils.addSclass("AccountInfoCockpit", mForm);
 
 		mForm.appendChild(layout);
@@ -302,6 +325,8 @@ public class PAT_WAcctInfCptForm
 		tBalanceOfAccountsList.setImage(ThemeManager.getThemeResource("images/Report24.png"));
 		tBalanceOfAccountsList.addEventListener(Events.ON_CLICK, this);
 		
+		tButtonTreeSummary.setImage(ThemeManager.getThemeResource("images/Summary16.png"));
+		tButtonTreeSummary.addEventListener(Events.ON_CLICK, this);
 		
 		toolBar.appendChild(tButtonAccountCourse);
 		toolBar.appendChild(tButtonAccountsOverView);
@@ -309,6 +334,7 @@ public class PAT_WAcctInfCptForm
 		toolBar.appendChild(tButtonSummaryDocument);
 		toolBar.appendChild(tButtonSummary);
 		toolBar.appendChild(tBalanceOfAccountsList);
+		toolBar.appendChild(tButtonTreeSummary);
 
 		return toolBar;
 	}
@@ -478,6 +504,8 @@ public class PAT_WAcctInfCptForm
 		params.put("doctable", listboxSummaryTable.getSelectedItem().getLabel());
 		params.put("docno", labelSummaryAccountDocument.getValue());
 		params.put("summaryDocument", isSummaryDocument);
+		params.put("treeSummary", "");
+		params.put("treeValue", null);
 
 	}
 
@@ -549,9 +577,50 @@ public class PAT_WAcctInfCptForm
 
 	}
 
+	private void createEmptyColumns(int columncount) {
+
+		for(Component listhead : listboxResult.getHeads())
+			if(listhead instanceof ListHead)
+				for(int column=1;column<=columncount;column++)					
+					listhead.appendChild(new ListHeader());
+
+	}
+	
+	
+	private int getHeadColumnsCount(){
+		
+		int count=0;
+		
+		for(Component listhead : listboxResult.getHeads())
+			if(listhead instanceof ListHead)
+				for (Component listheader : listhead.getChildren())
+					if(listheader instanceof ListHeader)
+						count++;
+		
+		return count--;
+		
+	}
+	
+	private void clearHeadColumns(){
+
+		for(Component listhead : listboxResult.getHeads())
+			if(listhead instanceof ListHead)
+				for (Component listheader : listhead.getChildren())				
+					if(listheader instanceof ListHeader)
+						((ListHeader)listheader).setLabel("");
+
+	}
+	
 	private void clearList() {
 		
 		listboxResult.removeAllItems();
+		frozen.setColumns(0);
+
+		for(Component listhead : listboxResult.getHeads())
+			if(listhead instanceof ListHead)
+				listboxResult.removeChild((ListHead)listhead);
+		
+		listboxResult.appendChild(createHeader(headColumns()));
 
 	}
 
@@ -577,67 +646,49 @@ public class PAT_WAcctInfCptForm
 
 	private void setLabelOfColumn(int pos, String label){
 		
-		int p = 0;
-		
-		ListHead listhead = null;		
+		int p = 0;		
 
-		for(Component c : listboxResult.getHeads()){
+		for(Component listhead : listboxResult.getHeads())
+			if(listhead instanceof ListHead)
+				for (Component listheader : ((ListHead)listhead).getChildren()){
+					if(listheader instanceof ListHeader){
+						
+						if(p==pos){
+							
+							((ListHeader)listheader).setLabel(Msg.getMsg(Env.getCtx(), label));
 
-			if(c instanceof ListHead){
-				
-				listhead = (ListHead)c;
-	
-				for (Component c2 : listhead.getChildren()){
-					
-					ListHeader listheader = null;
-					
-					if(c2 instanceof ListHeader){
+						}
 						
-						listheader = (ListHeader)c2;
-						
-						if(p==pos)
-							listheader.setLabel(Msg.getMsg(Env.getCtx(), label));
-						
+						if (p!=0){
+							
+							((ListHeader)listheader).setAlign("right");
+							((ListHeader)listheader).setWidth("100px");
+						}
 					}
-
+					
 					p++;
-				}
-
-			}
-		}	
-		
+				}		
 
 	}
+	
 	
 	private void refreshHeader(){
+		
 		int p = 0;
 		
-		ListHead listhead = null;		
-
-		for(Component c : listboxResult.getHeads()){
-
-			if(c instanceof ListHead){
-				
-				listhead = (ListHead)c;
-	
-				for (Component c2 : listhead.getChildren()){
+		for(Component listhead : listboxResult.getHeads())
+			if(listhead instanceof ListHead)
+				for (Component listheader : ((ListHead)listhead).getChildren()){
 					
-					ListHeader listheader = null;
-					
-					if(c2 instanceof ListHeader){
-						
-						listheader = (ListHeader)c2;
-						listheader.setLabel(headColumns().get(p));
-						
-					}
+					if(listheader instanceof ListHeader)
+						((ListHeader)listheader).setLabel(headColumns().get(p));
 					
 					p++;
 
 				}
 
-			}
-		}	
 	}
+	
 
 	private void addRecords(List<List<Object>> objs) {
 
@@ -743,8 +794,13 @@ public class PAT_WAcctInfCptForm
 		if (event.getTarget() == bCancel || event.getTarget() == bOkay)
 			dispose();
 
+
+
+		
 		if (event.getTarget() == dateboxDateFrom) {
 			
+			dateboxDateTo.setEnabled(true);
+
 			if(dateboxDateFrom.getValue() != null){
 				
 				Calendar cal = Calendar.getInstance();
@@ -753,6 +809,20 @@ public class PAT_WAcctInfCptForm
 				dateboxDateTo.setValue(cal.getTime());
 				
 			}
+			
+			if (checkboxOnMonth.isChecked() && isTreeSummary) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(dateboxDateFrom.getValue());
+				cal.set(Calendar.MONTH, Calendar.DECEMBER);
+				cal.set(Calendar.DAY_OF_MONTH,
+						cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+				dateboxDateTo.setValue(cal.getTime());
+				dateboxDateTo.setEnabled(false);
+			}
+
+			if (checkboxOnDay.isChecked() && isTreeSummary)
+				dateboxDateTo.setEnabled(false);
+
 		}
 
 		if (event.getTarget() == buttonSummaryAccountDocument) {
@@ -774,6 +844,7 @@ public class PAT_WAcctInfCptForm
 			isSummaryDocument = false;
 			isSummary = false;
 			isBalanceOfAccountsList = false;
+			isTreeSummary = false;
 
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(true);
@@ -806,6 +877,7 @@ public class PAT_WAcctInfCptForm
 			isSummaryDocument = false;
 			isSummary = false;
 			isBalanceOfAccountsList = false;
+			isTreeSummary = false;
 
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(true);
@@ -838,6 +910,7 @@ public class PAT_WAcctInfCptForm
 			isSummaryDocument = false;
 			isSummary = false;
 			isBalanceOfAccountsList = false;
+			isTreeSummary = false;
 
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(true);
@@ -870,6 +943,7 @@ public class PAT_WAcctInfCptForm
 			isSummaryDocument = true;
 			isSummary = false;
 			isBalanceOfAccountsList = false;
+			isTreeSummary = false;
 
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(false);
@@ -903,6 +977,7 @@ public class PAT_WAcctInfCptForm
 			isSummaryDocument = false;
 			isSummary = true;
 			isBalanceOfAccountsList = false;
+			isTreeSummary = false;
 
 			rowCheckbox.setVisible(true);
 			rowClientAndOrg.setVisible(true);
@@ -938,6 +1013,7 @@ public class PAT_WAcctInfCptForm
 			isSummaryDocument = false;
 			isSummary = false;
 			isBalanceOfAccountsList = true;
+			isTreeSummary = false;
 
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(true);
@@ -958,6 +1034,40 @@ public class PAT_WAcctInfCptForm
 
 		}
 		
+		if (event.getTarget() == tButtonTreeSummary) {
+
+			clearParameters();
+			clearList();
+			refreshHeader();
+			
+			setCheckboxOnYear();
+
+			isAccountCourse = false;
+			isAccountsOverView = false;
+			isAccountOverView = false;
+			isSummaryDocument = false;
+			isSummary = false;
+			isBalanceOfAccountsList = false;
+			isTreeSummary = true;
+
+			rowCheckbox.setVisible(true);
+			rowClientAndOrg.setVisible(true);
+			rowAcctSchema.setVisible(true);
+			rowAccountDocument.setVisible(false);
+			rowAcctValue.setVisible(false);
+			rowDate.setVisible(false);
+			rowDimension.setVisible(false);
+			rowDimension2.setVisible(false);
+			rowAdjustmentPeriod.setVisible(true);
+
+			tabBox.setSelectedIndex(0);
+
+			tabResult.setLabel(Msg.getMsg(Env.getCtx(), "Result").replaceAll("[&]", "") + " - "
+					+ Msg.getMsg(Env.getCtx(), "TreeSummary").replaceAll("[&]", ""));
+			tabParameter.setLabel(Msg.getMsg(Env.getCtx(), "Query").replaceAll("[&]", "") + " - "
+					+ Msg.getMsg(Env.getCtx(), "TreeSummary").replaceAll("[&]", ""));
+
+		}
 
 		if (event.getTarget() == checkboxOnYear) {
 			setCheckboxOnYear();
@@ -1005,6 +1115,10 @@ public class PAT_WAcctInfCptForm
 				BalanceOfAccountsList();
 			}
 
+			if (isTreeSummary){
+				treeSummary();
+			}
+
 			tabBox.setSelectedIndex(1);
 
 		}
@@ -1022,6 +1136,8 @@ public class PAT_WAcctInfCptForm
 
 	private void setCheckboxOnMonth() {
 
+		dateboxDateFrom.setValue(null);
+		dateboxDateTo.setValue(null);
 		rowDate.setVisible(true);
 		checkboxOnYear.setChecked(false);
 		checkboxOnDay.setChecked(false);
@@ -1029,6 +1145,8 @@ public class PAT_WAcctInfCptForm
 
 	private void setCheckboxOnDay() {
 
+		dateboxDateFrom.setValue(null);
+		dateboxDateTo.setValue(null);
 		rowDate.setVisible(true);
 		checkboxOnYear.setChecked(false);
 		checkboxOnMonth.setChecked(false);
@@ -1377,6 +1495,278 @@ public class PAT_WAcctInfCptForm
 				labelBalance.setStyle("color:red;font-weight: bold");
 			else
 				labelBalance.setStyle("color:black;font-weight: bold");
+	}	
+	
+	
+	private void treeSummary(){
+		
+		clearList();
+		
+		clearHeadColumns();
+		
+		frozen.setColumns(1);
+	
+		MTreeNode rootNode = getTreeSummary();
+		
+		if(rootNode != null)
+			fillTreeSummary(rootNode.children());	
+		
+	}
+	
+	
+	private MTreeNode getTreeSummary(){
+		
+		MTree_Base treebase = new Query(Env.getCtx(),MTree.Table_Name, MTree.COLUMNNAME_TreeType+ " ='EV'", null).setClient_ID().first();
+
+        MTree AccountTree = new MTree(Env.getCtx(), treebase.getAD_Tree_ID(), false, true, null);        
+
+        return AccountTree.getRoot();
+	
+	}
+
+
+	private void fillTreeSummary(Enumeration<?> nodeEnum) {
+		
+		
+		setLabelOfColumn(0, Msg.getMsg(Env.getCtx(), "SummaryAccounts"));
+		
+		
+		while (nodeEnum.hasMoreElements()) {
+
+			MTreeNode mChildNode = (MTreeNode) nodeEnum.nextElement();
+
+			if (mChildNode.isSummary()) {
+
+				StringBuffer summaryLabel = new StringBuffer();
+
+				for (int x = 2; x <= mChildNode.getLevel(); x++)
+					summaryLabel.append("\t ");
+				
+				summaryLabel.append(mChildNode.getName());
+
+					
+				ListItem item = new ListItem();
+				
+				ListCell cell = new ListCell();
+				cell.setLabel(summaryLabel.toString());
+				
+				
+				
+				if(mChildNode.getLevel() == 1)
+					cell.setStyle("color:black;font-weight: bold");
+				else
+					cell.setStyle("color:#5a5a5a;font-weight: bold");
+				
+				item.appendChild(cell);
+
+				params.put("organisation", listboxOrganisation.getSelectedItem().getLabel());
+				params.put("acctschema", listboxSelAcctSchema.getSelectedItem().getValue());
+				params.put("isWithAdjustmentPeriod", listboxWithAdjustmentPeriod.getSelectedItem());		
+				params.put("valueFrom", "");
+				params.put("valueTo", "");
+				
+				String list = MReportTree.getWhereClause(Env.getCtx(),0, MAcctSchemaElement.ELEMENTTYPE_Account, mChildNode.getNode_ID());
+				MElementValue eValue = new MElementValue(Env.getCtx(),mChildNode.getNode_ID(),null);
+				
+				params.put("treeSummary", list);
+				params.put("treeValue", eValue);							
+
+				
+				try {
+					
+					if (checkboxOnYear.isChecked()){
+						params.put("dateFrom", new Timestamp(0));
+						params.put("dateTo", new Timestamp(0));
+						
+						for(int c=1;c<getHeadColumnsCount();c++){
+							
+							ListCell ce = new ListCell();	
+							ce.setLabel("");
+							item.appendChild(ce);
+							
+						}
+						
+						addRecordsH(p_data.getRecords(sqls.getSqlTreeOnYear(params), params),item);
+					}
+					
+					if (checkboxOnMonth.isChecked()){
+						
+						if(dateboxDateFrom.getValue() == null){
+							FDialog.error(m_WindowNo, mForm, "ParameterError",
+									Msg.translate(Env.getCtx(), "DateFrom needed !"));
+							break;
+						}else{
+							createColumnsMonth(item);
+							params.put("dateFrom", new Timestamp(dateboxDateFrom.getValue().getTime()));
+							params.put("dateTo", new Timestamp(dateboxDateTo.getValue().getTime()));
+							addRecordsH(p_data.getRecords(sqls.getSqlTreeOnMonth(params), params), item);
+						}
+					}
+					
+					if (checkboxOnDay.isChecked()){
+
+						if(dateboxDateFrom.getValue() == null){
+							FDialog.error(m_WindowNo, mForm, "ParameterError",
+									Msg.translate(Env.getCtx(), "DateFrom needed !"));
+							break;
+						}else{
+							createColumnsDay(item);
+							params.put("dateFrom", new Timestamp(dateboxDateFrom.getValue().getTime()));
+							params.put("dateTo", new Timestamp(dateboxDateTo.getValue().getTime()));
+							addRecordsH(p_data.getRecords(sqls.getSqlTreeOnDay(params), params), item);
+						}
+					}
+					
+				} catch (ParseException e) {
+					
+					e.printStackTrace();
+				}
+
+				listboxResult.appendChild(item);
+				
+				if (mChildNode.getChildCount() > 0)
+					fillTreeSummary(mChildNode.children());
+				
+
+			}
+			
+		}
+
+	}
+
+
+	private void createColumnsMonth(ListItem item) {
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(dateboxDateFrom.getValue());
+
+		 dateFormat.format(dateboxDateFrom.getValue().getTime());
+		
+
+		for (int month= cal.get(Calendar.MONTH); month <= 12; month++ ){
+			
+			if(getHeadColumnsCount()<12)
+				createEmptyColumns(1);
+
+			setLabelOfColumn(month, String.valueOf(month));	
+
+		
+			ListCell cell = new ListCell();
+				
+			cell.setLabel("");
+			
+			item.appendChild(cell);
+			
+				
+		
+		}
+
+		
+	}	
+	
+	private void createColumnsDay(ListItem item) {
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(dateboxDateFrom.getValue());
+
+		dateFormat.format(dateboxDateFrom.getValue().getTime());
+
+		for (int day = cal.get(Calendar.DAY_OF_MONTH); day <= cal
+				.getActualMaximum(Calendar.DAY_OF_MONTH); day++) {
+
+			if (getHeadColumnsCount() <= cal
+					.getActualMaximum(Calendar.DAY_OF_MONTH))
+				createEmptyColumns(1);
+
+			setLabelOfColumn(day, String.valueOf(day));
+
+			ListCell cell = new ListCell();
+
+			cell.setLabel("");
+
+			item.appendChild(cell);
+
+		}
+	}	
+	
+	private void addRecordsH(List<List<Object>> objs,ListItem item) throws ParseException {
+		
+		int sortYear = 0;
+		
+		for (List<Object> obj : objs) {
+
+			if (checkboxOnMonth.isChecked()) {
+
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(dateFormat.parse((String)obj.get(4)));
+
+				
+				setCell(cal.get(Calendar.MONTH)+1, item,(String)obj.get(7));
+
+			}
+			
+			if (checkboxOnDay.isChecked()) {
+
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(dateFormat.parse((String)obj.get(4)));
+
+				
+				setCell(cal.get(Calendar.DAY_OF_MONTH)+1, item,(String)obj.get(7));
+
+			}
+
+			if (checkboxOnYear.isChecked()) {
+				
+
+				if(getHeadColumnsCount()<sortYear)
+					createEmptyColumns(1);
+				
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(dateFormat.parse((String)obj.get(4)));
+				
+				if(cal.get(Calendar.YEAR)< sortYear)
+					sortYear--;
+				else if(cal.get(Calendar.YEAR)>sortYear)
+					sortYear++;
+				
+				
+				setLabelOfColumn(sortYear, String.valueOf(cal.get(Calendar.YEAR)));	
+							
+				setCell(sortYear, item,(String)obj.get(7));
+				
+			}
+			
+
+		}
+
+	}
+
+	private void setCell(int col, ListItem item, String label) {
+
+		int y = 0;
+
+		for (Component cell : item.getChildren()) {
+
+				if (y == col){
+					
+						try {
+							if (numberFormat.parse(label).floatValue() < 0)
+								((ListCell) cell).setStyle("color:red;font-weight: bold;text-align: right");
+							else
+								((ListCell) cell).setStyle("font-weight: bold;text-align: right");
+						} catch (ParseException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					
+					((ListCell) cell).setLabel(label);
+					
+				}
+			
+
+			y++;
+		}
+
 	}
 	
 	@Override
