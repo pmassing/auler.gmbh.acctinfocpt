@@ -41,6 +41,9 @@ import org.compiere.model.MAcctSchema;
 import org.compiere.model.MElementValue;
 import org.compiere.model.MOrg;
 import org.compiere.model.MTable;
+import org.compiere.model.MTree;
+import org.compiere.model.MTreeNode;
+import org.compiere.model.MTree_Base;
 import org.compiere.model.Query;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
@@ -64,6 +67,8 @@ public class PAT_Data {
 	private BigDecimal credit = new BigDecimal("0");
 	private BigDecimal balance = new BigDecimal("0");
 
+	private PAT_Sqls sqls = new PAT_Sqls();
+	
 	/** Logger */
 	public static CLogger log = CLogger.getCLogger(PAT_WAcctInfCptForm.class);
 
@@ -443,5 +448,34 @@ public class PAT_Data {
 	public BigDecimal getBalance(){
 		
 		return balance;
+	}
+	
+	
+	public MTreeNode getTreeSummary(){
+		
+		MTree_Base treebase = new Query(Env.getCtx(),MTree.Table_Name, MTree.COLUMNNAME_TreeType+ " ='EV'", null).setClient_ID().first();
+
+        MTree AccountTree = new MTree(Env.getCtx(), treebase.getAD_Tree_ID(), false, true, null);        
+
+        return AccountTree.getRoot();
+	
 	}	
+	
+	public List<Object> getAccountsListWhereClause(){		
+		
+		List<Object> valueList = DB.getSQLValueObjectsEx(null, sqls.getSQLAccountIDsInFactAcct().toString());
+		
+		return valueList;
+		
+	}
+	
+	public String acctListshorten(String list){
+		
+		for(Object accountid : getAccountsListWhereClause())
+		if(!list.contains(String.valueOf(accountid)))
+			list.replaceAll("OR Account_ID="+accountid, "");
+		
+		return list;
+	}	
+	
 }

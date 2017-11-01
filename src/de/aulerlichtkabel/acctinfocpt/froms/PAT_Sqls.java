@@ -553,8 +553,8 @@ public class PAT_Sqls {
 				.append("select "
 						+ "1 as row,"
 						+ "null as fact_acct_id,"
-						+ "clientname,"
-						+ "orgname,"
+						+ "null as clientname,"
+						+ "null as orgname,"
 						+ "null as account_id,"
 						+ "null as account_value,"
 						+ "null as account_name,"
@@ -576,15 +576,15 @@ public class PAT_Sqls {
 						+ "null as salesregion,"
 						+ "null as tablename "
 
-						+ "from pat_facourse "
+						+ "from fact_acct f "
 
-						+ " left join c_period p on p.c_period_id = pat_facourse.c_period_id and p.ad_client_id = pat_facourse.ad_client_id "
+						+ " left join c_period p on p.c_period_id = f.c_period_id and p.ad_client_id = f.ad_client_id "
 
 						+ " where " + params.get("treeSummary")
 
-						+ " and clientname = ? "
+						+ " and f.ad_client_id = (select ad_client_id from ad_client where name= ? )"
 
-						+ " and orgname = ? "
+						+ " and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "
 
 						+ " and c_acctschema_id = ? "
 
@@ -608,7 +608,7 @@ public class PAT_Sqls {
 						);
 
 		if(((String) params.get("organisation")).equals("*"))
-			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+			sql.delete(sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "), sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ")+(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ").length());
 
 		return sql;
 
@@ -620,8 +620,8 @@ public class PAT_Sqls {
 				.append("select "
 						+ "1 as row,"
 						+ "null as fact_acct_id,"
-						+ "clientname,"
-						+ "orgname,"
+						+ "null as clientname,"
+						+ "null as orgname,"
 						+ "null as account_id,"
 						+ "null as account_value,"
 						+ "null as account_name,"
@@ -643,17 +643,17 @@ public class PAT_Sqls {
 						+ "null as salesregion,"
 						+ "null as tablename "
 
-						+ "from pat_facourse "
+						+ "from fact_acct f "
 
-						+ " left join c_period p on p.c_period_id = pat_facourse.c_period_id and p.ad_client_id = pat_facourse.ad_client_id "
+						+ " left join c_period p on p.c_period_id = f.c_period_id and p.ad_client_id = f.ad_client_id "
 
 						+ " where " + params.get("treeSummary")
 
 						+ " and dateacct between ? and ? "
 						
-						+ " and clientname = ? "
+						+ " and f.ad_client_id = (select ad_client_id from ad_client where name= ? )"
 
-						+ " and orgname = ? "
+						+ " and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "
 
 						+ " and c_acctschema_id = ? "
 
@@ -679,7 +679,7 @@ public class PAT_Sqls {
 						);
 
 		if(((String) params.get("organisation")).equals("*"))
-			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+			sql.delete(sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "), sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ")+(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ").length());
 
 		return sql;
 
@@ -691,8 +691,8 @@ public class PAT_Sqls {
 				.append("select "
 						+ "1 as row,"
 						+ "null as fact_acct_id,"
-						+ "clientname,"
-						+ "orgname,"
+						+ "null as clientname,"
+						+ "null as orgname,"
 						+ "null as account_id,"
 						+ "null as account_value,"
 						+ "null as account_name,"
@@ -711,17 +711,17 @@ public class PAT_Sqls {
 						+ "null as salesregion,"
 						+ "null as tablename "
 
-						+ "from pat_facourse "
+						+ "from fact_acct f "
 
-						+ " left join c_period p on p.c_period_id = pat_facourse.c_period_id and p.ad_client_id = pat_facourse.ad_client_id "
+						+ " left join c_period p on p.c_period_id = f.c_period_id and p.ad_client_id = f.ad_client_id "
 
 						+ " where " + params.get("treeSummary")
 
 						+ " and dateacct between ? and ? "
 						
-						+ " and clientname = ? "
+						+ " and f.ad_client_id = (select ad_client_id from ad_client where name= ? )"
 
-						+ " and orgname = ? "
+						+ " and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "
 
 						+ " and c_acctschema_id = ? "
 
@@ -741,9 +741,16 @@ public class PAT_Sqls {
 						);
 
 		if(((String) params.get("organisation")).equals("*"))
-			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
+			sql.delete(sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) "), sql.indexOf(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ")+(" and f.ad_org_id = (select ad_org_id from ad_org where name= ? ) ").length());
 
 		return sql;
 
+	}
+	
+	public StringBuilder getSQLAccountIDsInFactAcct(){
+		
+		return new StringBuilder()
+		.append("select account_id from fact_acct where ad_client_id = 1000005 group by account_id");
+		
 	}
 }

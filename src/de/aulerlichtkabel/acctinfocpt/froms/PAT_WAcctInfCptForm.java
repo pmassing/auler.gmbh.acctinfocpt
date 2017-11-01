@@ -73,10 +73,7 @@ import org.compiere.model.MElementValue;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MOrg;
-import org.compiere.model.MTree;
 import org.compiere.model.MTreeNode;
-import org.compiere.model.MTree_Base;
-import org.compiere.model.Query;
 import org.compiere.report.MReportTree;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
@@ -1506,22 +1503,11 @@ public class PAT_WAcctInfCptForm
 		
 		frozen.setColumns(1);
 	
-		MTreeNode rootNode = getTreeSummary();
+		MTreeNode rootNode = p_data.getTreeSummary();
 		
 		if(rootNode != null)
 			fillTreeSummary(rootNode.children());	
 		
-	}
-	
-	
-	private MTreeNode getTreeSummary(){
-		
-		MTree_Base treebase = new Query(Env.getCtx(),MTree.Table_Name, MTree.COLUMNNAME_TreeType+ " ='EV'", null).setClient_ID().first();
-
-        MTree AccountTree = new MTree(Env.getCtx(), treebase.getAD_Tree_ID(), false, true, null);        
-
-        return AccountTree.getRoot();
-	
 	}
 
 
@@ -1565,7 +1551,7 @@ public class PAT_WAcctInfCptForm
 				params.put("valueFrom", "");
 				params.put("valueTo", "");
 				
-				String list = MReportTree.getWhereClause(Env.getCtx(),0, MAcctSchemaElement.ELEMENTTYPE_Account, mChildNode.getNode_ID());
+				String list = p_data.acctListshorten(MReportTree.getWhereClause(Env.getCtx(),0, MAcctSchemaElement.ELEMENTTYPE_Account, mChildNode.getNode_ID()));		
 				MElementValue eValue = new MElementValue(Env.getCtx(),mChildNode.getNode_ID(),null);
 				
 				params.put("treeSummary", list);
@@ -1633,6 +1619,8 @@ public class PAT_WAcctInfCptForm
 		}
 
 	}
+	
+
 
 
 	private void createColumnsMonth(ListItem item) {
