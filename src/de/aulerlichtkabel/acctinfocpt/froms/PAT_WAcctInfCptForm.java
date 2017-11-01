@@ -22,7 +22,9 @@
 
 package de.aulerlichtkabel.acctinfocpt.froms;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
+import java.net.URLConnection;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -33,6 +35,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.adempiere.webui.LayoutUtils;
 import org.adempiere.webui.component.Borderlayout;
@@ -80,6 +83,8 @@ import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.Msg;
 import org.compiere.util.ValueNamePair;
+import org.zkoss.image.AImage;
+import org.zkoss.image.Image;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -89,9 +94,15 @@ import org.zkoss.zul.Frozen;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Toolbar;
 import org.zkoss.zul.Vbox;
+
+
+
 import org.zkoss.zul.Label;
 import org.zkoss.zul.South;
 import org.zkoss.zul.Space;
+
+import de.aulerlichtkabel.acctinfocpt.data.PAT_Data;
+import de.aulerlichtkabel.acctinfocpt.data.PAT_Sqls;
 
 public class PAT_WAcctInfCptForm
 		implements IFormController, EventListener<Event>, WTableModelListener, ValueChangeListener {
@@ -118,6 +129,8 @@ public class PAT_WAcctInfCptForm
 	private ToolBarButton tButtonSummary = new ToolBarButton();
 	private ToolBarButton tBalanceOfAccountsList = new ToolBarButton();
 	private ToolBarButton tButtonTreeSummary = new ToolBarButton();
+	private ToolBarButton tButtonExportHtml = new ToolBarButton();
+	private ToolBarButton tButtonExportText = new ToolBarButton();
 
 	Vbox vBox = new Vbox();
 
@@ -203,7 +216,7 @@ public class PAT_WAcctInfCptForm
 	private PAT_Data p_data = new PAT_Data();
 
 	// Format
-	public DecimalFormat numberFormat = DisplayType.getNumberFormat(DisplayType.Amount);
+	DecimalFormat numberFormat = DisplayType.getNumberFormat(DisplayType.Amount);
 
 	private boolean isAccountCourse = false;
 	private boolean isAccountsOverView = false;
@@ -212,6 +225,8 @@ public class PAT_WAcctInfCptForm
 	private boolean isSummary = false;
 	private boolean isBalanceOfAccountsList = false;
 	private boolean isTreeSummary = false;
+
+	private String ISNUMERIC = "<N>";
 	
 	Map<String, Object> params = new HashMap<String, Object>();
 	
@@ -231,7 +246,7 @@ public class PAT_WAcctInfCptForm
 	}
 
 	private void init() {
-
+		
 		textboxClient.setReadonly(true);
 
 		MLookup acctVaL = MLookupFactory.get(Env.getCtx(), mForm.getWindowNo(), 0, 207736, DisplayType.Search);
@@ -255,7 +270,6 @@ public class PAT_WAcctInfCptForm
 		searchEditorProject = new WSearchEditor("C_Project_ID", false, false, true, projectVaL);
 		
 		listboxResult.setSizedByContent(true);
-		listboxResult.appendChild(frozen);
 		
 		LayoutUtils.addSclass("AccountInfoCockpit", mForm);
 
@@ -286,7 +300,7 @@ public class PAT_WAcctInfCptForm
 		tabBox.setVflex("1");
 
 		Center center = new Center();
-		center.setAutoscroll(false);
+		center.setAutoscroll(true);
 		center.setHflex("1");
 		center.setVflex("1");
 		center.setParent(layout);
@@ -294,30 +308,74 @@ public class PAT_WAcctInfCptForm
 		tabBox.setParent(center);
 
 	}
+	
+	private Image getImageFromLocalSource(String path){
+		
+		String resourceName = path.substring(path.lastIndexOf("/"));
+		
+		Image image = null;
+		
+		try
+		{
+
+			byte[] buffer = new byte[1024*8];
+			int length = -1;
+
+		    URLConnection urlConnection = this.getClass().getClassLoader().getResource(path).openConnection();
+			urlConnection.setUseCaches(false);
+
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			
+			while ((length = urlConnection.getInputStream().read(buffer)) != -1)
+				outputStream.write(buffer, 0, length);
+			
+			outputStream.close();
+			
+			image =  new AImage(resourceName, outputStream.toByteArray());
+			
+		}
+		catch (Exception e)
+		{
+			if (log.isLoggable(Level.CONFIG)) log.config (e.toString());
+		}
+		
+		
+		return image;
+		
+	}		
+
+	
 
 	private Toolbar createToolbar() {
 
-		tButtonAccountCourse.setImage(ThemeManager.getThemeResource("images/InfoAccount24.png"));
+		tButtonAccountCourse.setImageContent(getImageFromLocalSource("images/AccountCourse.png"));
 		tButtonAccountCourse.setTooltip("AccountCourse");
 		tButtonAccountCourse.addEventListener(Events.ON_CLICK, this);
 
-		tButtonAccountsOverView.setImage(ThemeManager.getThemeResource("images/Account24.png"));
+		tButtonAccountsOverView.setImageContent(getImageFromLocalSource("images/AccountsOverview.png"));
 		tButtonAccountsOverView.addEventListener(Events.ON_CLICK, this);
 
-		tButtonAccountOverView.setImage(ThemeManager.getThemeResource("images/Account24.png"));
+		tButtonAccountOverView.setImageContent(getImageFromLocalSource("images/AccountOverview.png"));
 		tButtonAccountOverView.addEventListener(Events.ON_CLICK, this);
 
-		tButtonSummaryDocument.setImage(ThemeManager.getThemeResource("images/Report24.png"));
+		tButtonSummaryDocument.setImageContent(getImageFromLocalSource("images/DocumentSummary.png"));
 		tButtonSummaryDocument.addEventListener(Events.ON_CLICK, this);
 
-		tButtonSummary.setImage(ThemeManager.getThemeResource("images/Summary24.png"));
+		tButtonSummary.setImageContent(getImageFromLocalSource("images/AccountSummary.png"));
 		tButtonSummary.addEventListener(Events.ON_CLICK, this);
 		
-		tBalanceOfAccountsList.setImage(ThemeManager.getThemeResource("images/Report24.png"));
+		tBalanceOfAccountsList.setImageContent(getImageFromLocalSource("images/BalanceOfAccountsList.png"));
 		tBalanceOfAccountsList.addEventListener(Events.ON_CLICK, this);
 		
-		tButtonTreeSummary.setImage(ThemeManager.getThemeResource("images/Summary16.png"));
+		tButtonTreeSummary.setImageContent(getImageFromLocalSource("images/AccountTreeSummary.png"));
 		tButtonTreeSummary.addEventListener(Events.ON_CLICK, this);
+		
+		tButtonExportHtml.setImageContent(getImageFromLocalSource("images/ExportResultAsHtml.png"));
+		tButtonExportHtml.addEventListener(Events.ON_CLICK, this);
+		
+		tButtonExportText.setImageContent(getImageFromLocalSource("images/ExportResultAsText.png"));
+		tButtonExportText.addEventListener(Events.ON_CLICK, this);
+		
 		
 		toolBar.appendChild(tButtonAccountCourse);
 		toolBar.appendChild(tButtonAccountsOverView);
@@ -326,7 +384,9 @@ public class PAT_WAcctInfCptForm
 		toolBar.appendChild(tButtonSummary);
 		toolBar.appendChild(tBalanceOfAccountsList);
 		toolBar.appendChild(tButtonTreeSummary);
-
+		toolBar.appendChild(tButtonExportHtml);
+		toolBar.appendChild(tButtonExportText);
+		
 		return toolBar;
 	}
 
@@ -541,7 +601,9 @@ public class PAT_WAcctInfCptForm
 		listboxResult.setAutopaging(true);
 		// mold: allowed: [paging, select, default]
 		listboxResult.setMold("paging");
+		listboxResult.setSizedByContent(true);
 		listboxResult.setVflex("1");
+		listboxResult.setHflex("1");
 
 		listboxResult.appendChild(createHeader(headColumns()));
 
@@ -554,15 +616,28 @@ public class PAT_WAcctInfCptForm
 		headColumn.add(Msg.translate(Env.getCtx(), "Organisation"));
 		headColumn.add(Msg.translate(Env.getCtx(), "Account"));
 		headColumn.add(Msg.translate(Env.getCtx(), "Name"));
-		headColumn.add(Msg.translate(Env.getCtx(), "DateAcct"));
-		headColumn.add(Msg.translate(Env.getCtx(), "Debit"));
-		headColumn.add(Msg.translate(Env.getCtx(), "Credit"));
-		headColumn.add(Msg.translate(Env.getCtx(), "Balance"));
-		headColumn.add(Msg.translate(Env.getCtx(), new String("Product").replaceAll("[&]", "")));
-		headColumn.add(Msg.translate(Env.getCtx(), new String("BPartner").replaceAll("[&]", "")));
-		headColumn.add(Msg.translate(Env.getCtx(), "SalesRegion"));
-		headColumn.add(Msg.translate(Env.getCtx(), "Project"));
-		headColumn.add(Msg.translate(Env.getCtx(), "Table"));
+		// In this case balance_carried_forward, debit, credit, current_balance, ending_balance
+		if(isBalanceOfAccountsList){
+			headColumn.add(Msg.translate(Env.getCtx(), "BalanceCarriedForward"));
+			headColumn.add(Msg.translate(Env.getCtx(), "Debit"));
+			headColumn.add(Msg.translate(Env.getCtx(), "Credit"));
+			headColumn.add(Msg.translate(Env.getCtx(), "Balance"));
+			headColumn.add(Msg.translate(Env.getCtx(), "CurrentBalance"));
+			headColumn.add(Msg.translate(Env.getCtx(), "EndingBalance"));
+			headColumn.add(Msg.translate(Env.getCtx(), ""));
+			headColumn.add(Msg.translate(Env.getCtx(), ""));
+			headColumn.add(Msg.translate(Env.getCtx(), ""));
+		}else{
+			headColumn.add(Msg.translate(Env.getCtx(), "DateAcct"));
+			headColumn.add(Msg.translate(Env.getCtx(), "Debit"));
+			headColumn.add(Msg.translate(Env.getCtx(), "Credit"));
+			headColumn.add(Msg.translate(Env.getCtx(), "Balance"));
+			headColumn.add(Msg.translate(Env.getCtx(), new String("Product").replaceAll("[&]", "")));			
+			headColumn.add(Msg.translate(Env.getCtx(), new String("BPartner").replaceAll("[&]", "")));
+			headColumn.add(Msg.translate(Env.getCtx(), "SalesRegion"));
+			headColumn.add(Msg.translate(Env.getCtx(), "Project"));
+			headColumn.add(Msg.translate(Env.getCtx(), "Table"));
+		}
 
 		return headColumn;
 
@@ -591,13 +666,59 @@ public class PAT_WAcctInfCptForm
 		return count--;
 		
 	}
+
+	private List<String> getHeadColumns(){
+		
+		List<String> headColumns = new ArrayList<String>();
+		
+		for(Component listhead : listboxResult.getHeads())
+			if(listhead instanceof ListHead)
+				for (Component listheader : listhead.getChildren()){
+					if(listheader instanceof ListHeader){
+						if(((ListHeader)listheader).getLabel().equals(Msg.translate(Env.getCtx(), "BalanceCarriedForward"))
+									||((ListHeader)listheader).getLabel().equals(Msg.translate(Env.getCtx(), "Debit"))
+									||((ListHeader)listheader).getLabel().equals(Msg.translate(Env.getCtx(), "Credit"))
+									||((ListHeader)listheader).getLabel().equals(Msg.translate(Env.getCtx(), "Balance"))
+									||((ListHeader)listheader).getLabel().equals(Msg.translate(Env.getCtx(), "CurrentBalance"))
+									||((ListHeader)listheader).getLabel().equals(Msg.translate(Env.getCtx(), "EndingBalance")))
+							headColumns.add(ISNUMERIC+((ListHeader)listheader).getLabel());
+						else
+							headColumns.add(((ListHeader)listheader).getLabel());							
+					}
+				}
+		
+		return headColumns;
+		
+	}
+	
+	private List<List<Object>> getRows(){
+		
+		List<List<Object>> rows = new ArrayList<List<Object>>();			
+		
+		for(Component litem : listboxResult.getChildren()){
+			
+			List<Object> column = new ArrayList<Object>();
+			
+			if(litem instanceof ListItem)
+				for(Component lcell : ((ListItem)litem).getChildren())
+					if(lcell instanceof ListCell)
+							column.add(((ListCell)lcell).getValue());
+				
+			rows.add(column);
+			
+		}
+
+		
+		return rows;
+		
+	}
 	
 	private void clearHeadColumns(){
 
 		for(Component listhead : listboxResult.getHeads())
 			if(listhead instanceof ListHead)
-				for (Component listheader : listhead.getChildren())				
-					if(listheader instanceof ListHeader)
+				for (Component listheader : ((Component)listhead).getChildren())				
+					if(listheader instanceof ListItem)
 						((ListHeader)listheader).setLabel("");
 
 	}
@@ -605,8 +726,9 @@ public class PAT_WAcctInfCptForm
 	private void clearList() {
 		
 		listboxResult.removeAllItems();
-		frozen.setColumns(0);
-
+		listboxResult.removeChild(frozen);
+		listboxResult.setSizedByContent(true);
+		
 		for(Component listhead : listboxResult.getHeads())
 			if(listhead instanceof ListHead)
 				listboxResult.removeChild((ListHead)listhead);
@@ -698,10 +820,20 @@ public class PAT_WAcctInfCptForm
 		ListItem item = new ListItem();
 		int c = 1;
 
-		for (Object o : row) {
+		for (int pos = 0; pos < row.size(); pos ++) {
 
+			Object o = row.get(pos);
+			
 			ListCell cell = new ListCell();
-			cell.setLabel(o.toString());
+			
+			if (o instanceof BigDecimal)			
+				cell.setLabel(numberFormat.format(o));
+			else if (o instanceof Timestamp)
+				cell.setLabel(Env.getLanguage(Env.getCtx()).getDateFormat().format(o));
+			else
+				cell.setLabel(o.toString());
+			
+			cell.setValue(o);
 
 			// account value
 			if (c == 3)
@@ -727,6 +859,8 @@ public class PAT_WAcctInfCptForm
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
+				
+				
 			}
 			
 			if(isBalanceOfAccountsList){
@@ -1064,7 +1198,13 @@ public class PAT_WAcctInfCptForm
 		}
 
 		
+		if (event.getTarget() == tButtonExportHtml) {
+			exportAsHtml();
+		}
 		
+		if (event.getTarget() == tButtonExportText) {
+			exportAsText();
+		}
 		
 		if (event.getTarget() == checkboxOnYear) {
 			setCheckboxOnYear();
@@ -1119,9 +1259,24 @@ public class PAT_WAcctInfCptForm
 			tabBox.setSelectedIndex(1);
 
 		}
+		
+		event.stopPropagation();
 
 	}
 
+	private void exportAsHtml() {
+
+		p_data.exportAsHtml(tabResult.getLabel(), getHeadColumns(), getRows());
+		
+	}
+
+	private void exportAsText() {
+
+		p_data.exportAsTxt(tabResult.getLabel(), getHeadColumns(), getRows());
+		
+	}
+
+	
 	private void setCheckboxOnYear() {
 		dateboxDateFrom.setValue(null);
 		dateboxDateTo.setValue(null);
@@ -1501,8 +1656,10 @@ public class PAT_WAcctInfCptForm
 		
 		clearHeadColumns();
 		
+		listboxResult.setSizedByContent(true);
+		listboxResult.appendChild(frozen);
 		frozen.setColumns(1);
-	
+		
 		MTreeNode rootNode = p_data.getTreeSummary();
 		
 		if(rootNode != null)

@@ -20,14 +20,13 @@
  *  
  */
 
-package de.aulerlichtkabel.acctinfocpt.froms;
+package de.aulerlichtkabel.acctinfocpt.data;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,13 +46,14 @@ import org.compiere.model.MTree_Base;
 import org.compiere.model.Query;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
-import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.ValueNamePair;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zul.Label;
+
+import de.aulerlichtkabel.acctinfocpt.froms.PAT_WAcctInfCptForm;
 
 public class PAT_Data {
 
@@ -209,19 +209,17 @@ public class PAT_Data {
 
 		List<List<Object>> rows = new ArrayList<List<Object>>();
 
-		DecimalFormat numberFormat = DisplayType.getNumberFormat(DisplayType.Amount);
-
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		try {
 
 			StringBuilder sqlApx = new StringBuilder();
-
+			
 			sqlApx.append(" 1 = 1 ");
 
 			if (params.get("product_id") != null) {
-
+				
 				sqlApx.append(" and m_product_id = ? ");
 			}
 
@@ -242,11 +240,32 @@ public class PAT_Data {
 
 			sqlApx.append(" and ");
 			
-			sql.insert(sql.indexOf("where ")+6, sqlApx);
+			sql.insert(sql.indexOf(" where ")+6, sqlApx);
 
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			// System.out.println(sql);
+
 			int idx = 1;
+
+			if (params.get("product_id") != null) {
+				pstmt.setInt(idx, (Integer) params.get("product_id"));
+				idx++;
+			}
+
+			if (params.get("bpartner_id") != null) {
+				pstmt.setInt(idx, (Integer) params.get("bpartner_id"));
+				idx++;
+			}
+
+			if (params.get("salesregion_id") != null) {
+				pstmt.setInt(idx, (Integer) params.get("salesregion_id"));
+				idx++;
+			}
+
+			if (params.get("project_id") != null) {
+				pstmt.setInt(idx, (Integer) params.get("project_id"));
+				idx++;
+			}
 
 			if (!((String) params.get("valueFrom")).equals("")) {
 				pstmt.setString(idx, (String) params.get("valueFrom"));
@@ -298,24 +317,6 @@ public class PAT_Data {
 				idx++;
 			}
 
-			if (params.get("product_id") != null) {
-				pstmt.setInt(idx, (Integer) params.get("product_id"));
-				idx++;
-			}
-
-			if (params.get("bpartner_id") != null) {
-				pstmt.setInt(idx, (Integer) params.get("bpartner_id"));
-				idx++;
-			}
-
-			if (params.get("salesregion_id") != null) {
-				pstmt.setInt(idx, (Integer) params.get("salesregion_id"));
-				idx++;
-			}
-
-			if (params.get("project_id") != null) {
-				pstmt.setInt(idx, (Integer) params.get("project_id"));
-			}
 
 			rs = pstmt.executeQuery();
 			
@@ -351,10 +352,10 @@ public class PAT_Data {
 				if (rs.getObject(9) != null){
 					
 					if (rs.getObject(9) instanceof Timestamp)
-						row.add(Env.getLanguage(Env.getCtx()).getDateFormat().format(rs.getTimestamp(9)));
+						row.add(rs.getTimestamp(9));
 				
 					if (rs.getObject(9) instanceof BigDecimal)
-						row.add(numberFormat.format(rs.getBigDecimal(9)));
+						row.add(rs.getBigDecimal(9));
 
 				}
 				else
@@ -363,21 +364,21 @@ public class PAT_Data {
  				
 				// Debit
 				if (rs.getBigDecimal(10) != null){
-					row.add(numberFormat.format(rs.getBigDecimal(10)));
+					row.add(rs.getBigDecimal(10));
 					debit=debit.add(rs.getBigDecimal(10));
 				}
 				else
 					row.add("");
 				// Credit
 				if (rs.getBigDecimal(11) != null){
-					row.add(numberFormat.format(rs.getBigDecimal(11)));
+					row.add(rs.getBigDecimal(11));
 					credit=credit.add(rs.getBigDecimal(11));
 				}
 				else
 					row.add("");
 				// Balance
 				if (rs.getBigDecimal(12) != null){
-					row.add(numberFormat.format(rs.getBigDecimal(12)));
+					row.add(rs.getBigDecimal(12));
 					balance=balance.add(rs.getBigDecimal(12));
 				}
 				
@@ -391,7 +392,7 @@ public class PAT_Data {
 						row.add(rs.getString(13));
 				
 					if (rs.getObject(13) instanceof BigDecimal)				
-						row.add(numberFormat.format(rs.getBigDecimal(13)));
+						row.add(rs.getBigDecimal(13));
 
 				}
 				else
@@ -477,5 +478,47 @@ public class PAT_Data {
 		
 		return list;
 	}	
+	
+	public void exportAsHtml(String title, List<String> contentHeader, List<List<Object>> rows){
+				
+		PAT_ExportAsHtml exportHtml = new PAT_ExportAsHtml();
+		
+		StringBuilder htmlContent = new StringBuilder();
+
+		exportHtml.setTitle(title);
+		
+		
+		htmlContent.append(exportHtml.createHTMLHead());
+		
+		//ColumnHead
+		
+		StringBuilder tableContent = new StringBuilder();
+	
+		tableContent.append(exportHtml.createTable(exportHtml.createTableHeadColumns(contentHeader)+exportHtml.createTableRows(rows)));
+				
+
+		
+		htmlContent.append(exportHtml.createHTMLBody("",tableContent.toString() , ""));		
+
+		
+		
+		exportHtml.downloadHtmlFile(title, htmlContent.toString());
+		
+	}
+	
+	
+	public void exportAsTxt(String title, List<String> contentHeader, List<List<Object>> rows){
+		
+		PAT_ExportAsText exportText = new PAT_ExportAsText();
+		
+		StringBuilder textContent = new StringBuilder();
+
+		exportText.setTitle(title);
+							
+		textContent.append(exportText.createContent(exportText.createHeadColumns(contentHeader)+exportText.createTableRows(rows)));
+				
+		exportText.downloadTxtFile(title, textContent.toString());
+		
+	}
 	
 }

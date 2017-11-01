@@ -20,7 +20,7 @@
  *  
  */
 
-package de.aulerlichtkabel.acctinfocpt.froms;
+package de.aulerlichtkabel.acctinfocpt.data;
 
 
 import java.util.Map;
@@ -444,7 +444,7 @@ public class PAT_Sqls {
 
 				+ " and p.periodtype like " + "'" + params.get("isWithAdjustmentPeriod").toString() + "'"
 
-				+ "order by dateacct ");
+				+ " order by dateacct ");
 				
 		if(((String) params.get("organisation")).equals("*"))
 			sql.delete(sql.indexOf("and orgname = ? "), sql.indexOf("and orgname = ? ")+("and orgname = ? ").length());
