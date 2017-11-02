@@ -337,7 +337,7 @@ public class PAT_Sqls {
 
 				+ "group by account_value," + "clientname," + "orgname,"
 				+ "account_id," + "account_value," + "account_name,"
-				+ "f.dateacct "
+				+ "f.dateacct, f.record_id "
 				
 				+ " order by account_value");
 
@@ -426,9 +426,9 @@ public class PAT_Sqls {
 				+ "null as bpartner_description, "
 				+ "salesregion, " 
 				+ "tablename, " 
-				+ "null as record_id "
+				+ "record_id "
 
-				+ "from pat_facourse "
+				+ " from pat_facourse "
 
 				+ " left join c_period p on p.c_period_id = pat_facourse.c_period_id and p.ad_client_id = pat_facourse.ad_client_id "
 

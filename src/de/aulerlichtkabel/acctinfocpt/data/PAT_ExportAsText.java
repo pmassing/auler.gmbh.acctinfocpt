@@ -148,7 +148,7 @@ public class PAT_ExportAsText {
 					row.append(numberFormat.format(column));
 				else if (column instanceof Timestamp)
 					row.append(Env.getLanguage(Env.getCtx()).getDateFormat().format(column));
-				else
+				else if (column instanceof String)
 					row.append(((String)column));
 
 				row.append(DELIMETER);

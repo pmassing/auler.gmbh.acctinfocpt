@@ -421,6 +421,9 @@ public class PAT_Data {
 				else
 					row.add("");
 
+				// Record_ID
+				row.add(rs.getInt(21));
+				
 				rows.add(row);
 			}
 

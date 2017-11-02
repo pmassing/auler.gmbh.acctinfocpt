@@ -206,7 +206,7 @@ public class PAT_ExportAsHtml {
 					tr.append(TDR + numberFormat.format(column) + TDC);
 				else if (column instanceof Timestamp)
 					tr.append(TDR + Env.getLanguage(Env.getCtx()).getDateFormat().format(column) + TDC);
-				else
+				else if (column instanceof String)
 					tr.append(TD + ((String)column) + TDC);
 					
 			}

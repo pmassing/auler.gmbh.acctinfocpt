@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.adempiere.webui.LayoutUtils;
+import org.adempiere.webui.apps.AEnv;
 import org.adempiere.webui.component.Borderlayout;
 import org.adempiere.webui.component.Button;
 import org.adempiere.webui.component.Checkbox;
@@ -76,7 +77,9 @@ import org.compiere.model.MElementValue;
 import org.compiere.model.MLookup;
 import org.compiere.model.MLookupFactory;
 import org.compiere.model.MOrg;
+import org.compiere.model.MTable;
 import org.compiere.model.MTreeNode;
+import org.compiere.model.Query;
 import org.compiere.report.MReportTree;
 import org.compiere.util.CLogger;
 import org.compiere.util.DisplayType;
@@ -201,12 +204,12 @@ public class PAT_WAcctInfCptForm
 	private WSearchEditor searchEditorProject;
 
 	private Panel southPanel = new Panel();;
-	private ConfirmPanel buttonPanel = new ConfirmPanel(true, true, false, false, false, false, false);
+	private ConfirmPanel buttonPanel = new ConfirmPanel(false, true, false, false, false, true, false);
 	private Grid buttonLayout = GridFactory.newGridLayout();
 
-	private Button bCancel = buttonPanel.getButton(ConfirmPanel.A_CANCEL);
 	private Button bRefresh = buttonPanel.getButton(ConfirmPanel.A_REFRESH);
 	private Button bOkay = buttonPanel.getButton(ConfirmPanel.A_OK);
+	private Button bZoom = buttonPanel.getButton(ConfirmPanel.A_ZOOM);
 
 	private Label labelDebit = new Label();
 	private Label labelCredit = new Label();
@@ -591,8 +594,9 @@ public class PAT_WAcctInfCptForm
 		south.appendChild(southPanel);
 
 		bRefresh.addActionListener(this);
-		bCancel.addActionListener(this);
 		bOkay.addActionListener(this);
+		bZoom.addActionListener(this);
+		bZoom.setVisible(false);
 
 	}
 
@@ -834,7 +838,7 @@ public class PAT_WAcctInfCptForm
 				cell.setLabel(o.toString());
 			
 			cell.setValue(o);
-
+			
 			// account value
 			if (c == 3)
 				cell.setStyle("font-weight: bold");
@@ -918,7 +922,7 @@ public class PAT_WAcctInfCptForm
 	public void onEvent(Event event) throws Exception {
 		
 
-		if (event.getTarget() == bCancel || event.getTarget() == bOkay)
+		if (event.getTarget() == bOkay)
 			dispose();
 
 
@@ -960,11 +964,6 @@ public class PAT_WAcctInfCptForm
 		}
 
 		if (event.getTarget() == tButtonAccountCourse) {
-
-
-			clearParameters();
-			clearList();
-			refreshHeader();
 			
 			isAccountCourse = true;
 			isAccountsOverView = false;
@@ -973,6 +972,10 @@ public class PAT_WAcctInfCptForm
 			isSummary = false;
 			isBalanceOfAccountsList = false;
 			isTreeSummary = false;
+			
+			clearParameters();
+			clearList();
+			refreshHeader();			
 			
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(true);
@@ -994,10 +997,6 @@ public class PAT_WAcctInfCptForm
 		}
 
 		if (event.getTarget() == tButtonAccountsOverView) {
-
-			clearParameters();
-			clearList();
-			refreshHeader();
 			
 			isAccountCourse = false;
 			isAccountsOverView = true;
@@ -1007,6 +1006,10 @@ public class PAT_WAcctInfCptForm
 			isBalanceOfAccountsList = false;
 			isTreeSummary = false;
 
+			clearParameters();
+			clearList();
+			refreshHeader();
+			
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(true);
 			rowAcctSchema.setVisible(true);
@@ -1027,10 +1030,6 @@ public class PAT_WAcctInfCptForm
 		}
 
 		if (event.getTarget() == tButtonAccountOverView) {
-
-			clearParameters();
-			clearList();
-			refreshHeader();
 			
 			isAccountCourse = false;
 			isAccountsOverView = false;
@@ -1040,6 +1039,10 @@ public class PAT_WAcctInfCptForm
 			isBalanceOfAccountsList = false;
 			isTreeSummary = false;
 
+			clearParameters();
+			clearList();
+			refreshHeader();
+			
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(true);
 			rowAcctSchema.setVisible(true);
@@ -1060,10 +1063,6 @@ public class PAT_WAcctInfCptForm
 		}
 
 		if (event.getTarget() == tButtonSummaryDocument) {
-
-			clearParameters();
-			clearList();
-			refreshHeader();
 			
 			isAccountCourse = false;
 			isAccountsOverView = false;
@@ -1073,6 +1072,10 @@ public class PAT_WAcctInfCptForm
 			isBalanceOfAccountsList = false;
 			isTreeSummary = false;
 
+			clearParameters();
+			clearList();
+			refreshHeader();
+			
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(false);
 			rowAcctSchema.setVisible(true);
@@ -1092,12 +1095,7 @@ public class PAT_WAcctInfCptForm
 		}
 
 		if (event.getTarget() == tButtonSummary) {
-
-			clearParameters();
-			clearList();
-			refreshHeader();
 			
-			setCheckboxOnYear();
 
 			isAccountCourse = false;
 			isAccountsOverView = false;
@@ -1106,6 +1104,12 @@ public class PAT_WAcctInfCptForm
 			isSummary = true;
 			isBalanceOfAccountsList = false;
 			isTreeSummary = false;
+
+			clearParameters();
+			clearList();
+			refreshHeader();
+			
+			setCheckboxOnYear();
 
 			rowCheckbox.setVisible(true);
 			rowClientAndOrg.setVisible(true);
@@ -1129,12 +1133,6 @@ public class PAT_WAcctInfCptForm
 		
 		if (event.getTarget() == tBalanceOfAccountsList) {
 
-			clearParameters();
-			clearList();
-			refreshHeader();
-			
-			setCheckboxOnYear();
-
 			isAccountCourse = false;
 			isAccountsOverView = false;
 			isAccountOverView = false;
@@ -1143,6 +1141,12 @@ public class PAT_WAcctInfCptForm
 			isBalanceOfAccountsList = true;
 			isTreeSummary = false;
 
+			clearParameters();
+			clearList();
+			refreshHeader();
+			
+			setCheckboxOnYear();
+			
 			rowCheckbox.setVisible(false);
 			rowClientAndOrg.setVisible(true);
 			rowAcctSchema.setVisible(true);
@@ -1164,12 +1168,6 @@ public class PAT_WAcctInfCptForm
 		
 		if (event.getTarget() == tButtonTreeSummary) {
 
-			clearParameters();
-			clearList();
-			refreshHeader();
-			
-			setCheckboxOnYear();
-
 			isAccountCourse = false;
 			isAccountsOverView = false;
 			isAccountOverView = false;
@@ -1178,6 +1176,12 @@ public class PAT_WAcctInfCptForm
 			isBalanceOfAccountsList = false;
 			isTreeSummary = true;
 
+			clearParameters();
+			clearList();
+			refreshHeader();
+			
+			setCheckboxOnYear();
+			
 			rowCheckbox.setVisible(true);
 			rowClientAndOrg.setVisible(true);
 			rowAcctSchema.setVisible(true);
@@ -1218,6 +1222,12 @@ public class PAT_WAcctInfCptForm
 
 		if (event.getTarget() == bRefresh) {
 
+			if (isAccountOverView)
+				bZoom.setVisible(true);
+			else
+				bZoom.setVisible(false);
+			
+			
 			if (isAccountCourse) {
 
 				accountCourse();
@@ -1232,11 +1242,14 @@ public class PAT_WAcctInfCptForm
 				if (checkboxOnDay.isChecked())
 					onDay();
 			}
-
+			
+			
 			if (isSummaryDocument) {
 
 				summaryAccountDocument();
+
 			}
+
 
 			if (isAccountsOverView) {
 
@@ -1247,6 +1260,8 @@ public class PAT_WAcctInfCptForm
 
 				accountOverView();
 			}
+
+				
 			
 			if (isBalanceOfAccountsList){
 				BalanceOfAccountsList();
@@ -1260,7 +1275,38 @@ public class PAT_WAcctInfCptForm
 
 		}
 		
+
+		if (event.getTarget() == bZoom) {
+
+			zoomToDoc();
+
+		}
+		
 		event.stopPropagation();
+
+	}
+
+	private void zoomToDoc() {
+
+		List<ListCell> cells = null;
+		int table_id = -1;
+
+		ListItem litem = listboxResult.getSelectedItem();
+
+		if (litem != null) {
+			cells = litem.getChildren();
+		}
+
+		if (!cells.isEmpty()) {
+
+			table_id = new Query(Env.getCtx(), MTable.Table_Name,
+					MTable.COLUMNNAME_TableName + "=? ", null).setParameters(
+					cells.get(12).getLabel()).firstId();
+
+			if((table_id != -1) && ((Integer) cells.get(13).getValue() != -1))
+				AEnv.zoom(table_id, (Integer) cells.get(13).getValue());
+
+		}
 
 	}
 
