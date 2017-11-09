@@ -1,7 +1,7 @@
 # ReadMe #
 
 ** Plugin-Name: AccountInfoCockpit for iDempiere **
-** Plug-in Version: 1.0 Revision 42**
+** Plug-in Version: 1.0 Revision 45**
 ** Status: Testing **
 ** Licence: GPLv2 **
 ** Author: Patric Maßing (Hans Auler GmbH), Germany **
