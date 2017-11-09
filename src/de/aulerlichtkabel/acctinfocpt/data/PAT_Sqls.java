@@ -750,7 +750,9 @@ public class PAT_Sqls {
 	public StringBuilder getSQLAccountIDsInFactAcct(){
 		
 		return new StringBuilder()
-		.append("select account_id from fact_acct where ad_client_id = 1000005 group by account_id");
+		.append("select account_id from fact_acct where ad_client_id =")
+		.append(Env.getAD_Client_ID(Env.getCtx()))
+		.append(" group by account_id");
 		
 	}
 }

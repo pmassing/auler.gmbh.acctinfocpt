@@ -40,19 +40,19 @@ import org.zkoss.zul.Filedownload;
 
 public class PAT_ExportAsText {
 
-	String ISNUMERIC = "<N>";
+	final String ISNUMERIC = "<N>";
 
-    String FILE_SUFFIX = ".txt";  
+	final String FILE_SUFFIX = ".txt";  
        
     String title = null;
     List<String> docContentHeader;
     List<String> columnHeadNames;
     List<List<Object>> columnsList;
     
-    String DELIMETER = "\t";
-    String LINEBREAK = "\n";
+    final String DELIMETER = "\t";
+    final String LINEBREAK = "\n";
     
-    String LINE = "--------------------------------------------";
+    final String LINE = "--------------------------------------------";
     
 	// Format
 	DecimalFormat numberFormat = DisplayType.getNumberFormat(DisplayType.Amount);

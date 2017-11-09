@@ -40,34 +40,34 @@ import org.zkoss.zul.Filedownload;
 
 public class PAT_ExportAsHtml {
 	
-	String ISNUMERIC = "<N>";
+	final String ISNUMERIC = "<N>";
 	
-    String FILE_SUFFIX = ".html";
+	final String FILE_SUFFIX = ".html";
     
-    String HTMLDEF = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\n\"http://www.w3.org/TR/html4/loose.dtd\">";
+	final String HTMLDEF = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\n\"http://www.w3.org/TR/html4/loose.dtd\">";
     
-    String HTML = "<html>";    
+	final String HTML = "<html>";    
       
-    String HEAD = "<head>";
-    String HEADC = "</head>";
-    String TITLE = "<title>";
-    String TITLEC = "</title>";
-    String BODY = "<body>";
-    String BODYC = "</body>";
-    String HR = "<hr>";
-    String HRC = "</hr>";
-    String TABLE = "<table>";
-    String TABLEB1 = "<table border=1>";
-    String TABLEC = "</table>";
-    String TR = "<tr>";
-    String TRC = "</tr>";
-    String TD = "<td>";
-    String TDR = "<td align=\"right\">";
-    String TDC = "</td>";
-    String B = "<b>";
-    String BC = "</b>";
-    String TFOOT = "<tfoot>";
-    String TFOOTC = "</tfoot>";
+	final String HEAD = "<head>";
+	final String HEADC = "</head>";
+	final String TITLE = "<title>";
+	final String TITLEC = "</title>";
+	final String BODY = "<body>";
+	final String BODYC = "</body>";
+	final String HR = "<hr>";
+	final String HRC = "</hr>";
+	final String TABLE = "<table>";
+	final String TABLEB1 = "<table border=1>";
+	final String TABLEC = "</table>";
+	final String TR = "<tr>";
+	final String TRC = "</tr>";
+	final String TD = "<td>";
+	final String TDR = "<td align=\"right\">";
+	final String TDC = "</td>";
+	final String B = "<b>";
+	final String BC = "</b>";
+	final String TFOOT = "<tfoot>";
+	final String TFOOTC = "</tfoot>";
        
     String title = null;
     List<String> docContentHeader;

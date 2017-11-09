@@ -283,10 +283,10 @@ public class PAT_WAcctInfCptForm
 	private void createTabs() {
 
 		tabParameter.addEventListener(Events.ON_SELECT, this);
-		tabParameter.setLabel(Msg.getMsg(Env.getCtx(), "ViewerQuery").replaceAll("[&]", ""));
+		tabParameter.setLabel(Msg.translate(Env.getCtx(), "ViewerQuery").replaceAll("[&]", ""));
 
 		tabResult.addEventListener(Events.ON_SELECT, this);
-		tabResult.setLabel(Msg.getMsg(Env.getCtx(), "ViewerResult").replaceAll("[&]", ""));
+		tabResult.setLabel(Msg.translate(Env.getCtx(), "ViewerResult").replaceAll("[&]", ""));
 
 		tabs.appendChild(tabParameter);
 		tabs.appendChild(tabResult);
@@ -560,6 +560,9 @@ public class PAT_WAcctInfCptForm
 		params.put("summaryDocument", isSummaryDocument);
 		params.put("treeSummary", "");
 		params.put("treeValue", null);
+		
+		bZoom.setVisible(false);
+
 
 	}
 
@@ -1885,20 +1888,18 @@ public class PAT_WAcctInfCptForm
 			if (checkboxOnMonth.isChecked()) {
 
 				Calendar cal = Calendar.getInstance();
-				cal.setTime(Env.getLanguage(Env.getCtx()).getDateFormat().parse((String)obj.get(4)));
-
+				cal.setTime((Date) obj.get(4));
 				
-				setCell(cal.get(Calendar.MONTH)+1, item,(String)obj.get(7));
+				setCell(cal.get(Calendar.MONTH)+1, item, numberFormat.format(obj.get(7)));
 
 			}
 			
 			if (checkboxOnDay.isChecked()) {
 
 				Calendar cal = Calendar.getInstance();
-				cal.setTime(Env.getLanguage(Env.getCtx()).getDateFormat().parse((String)obj.get(4)));
-
+				cal.setTime((Date) obj.get(4));
 				
-				setCell(cal.get(Calendar.DAY_OF_MONTH)+1, item,(String)obj.get(7));
+				setCell(cal.get(Calendar.DAY_OF_MONTH)+1, item, numberFormat.format(obj.get(7)));
 
 			}
 
@@ -1909,7 +1910,7 @@ public class PAT_WAcctInfCptForm
 					createEmptyColumns(1);
 				
 				Calendar cal = Calendar.getInstance();
-				cal.setTime(Env.getLanguage(Env.getCtx()).getDateFormat().parse((String)obj.get(4)));
+				cal.setTime((Date) obj.get(4));
 				
 				if(cal.get(Calendar.YEAR)< sortYear)
 					sortYear--;
@@ -1919,7 +1920,7 @@ public class PAT_WAcctInfCptForm
 				
 				setLabelOfColumn(sortYear, String.valueOf(cal.get(Calendar.YEAR)));	
 							
-				setCell(sortYear, item,(String)obj.get(7));
+				setCell(sortYear, item, numberFormat.format(obj.get(7)));
 				
 			}
 			
