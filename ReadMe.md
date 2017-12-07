@@ -1,13 +1,18 @@
 # ReadMe #
 
 ** Plugin-Name: AccountInfoCockpit for iDempiere **
-** Plug-in Version: 1.0 Revision 45**
+** Plug-in Version: 1.0**
 ** Status: Testing **
 ** Licence: GPLv2 **
-** Author: Patric Maßing (Hans Auler GmbH), Germany **
+** Author: Patric Maßing (Hans Auler GmbH), Germany, pmassing(at)aulerlichtkabel.de**
 ** Date: 2017 **
 ** Required environment: iDempiere with PostgreSQL-Database **
 
+
+** This Plug-in is distributed in the hope that it will be useful, **
+** but WITHOUT ANY WARRANTY; without even the implied warranty of **
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the **
+** GNU General Public License for more details. **
 
 *ToDo: german translation*
 *ToDo: better performance and keep resources by using TreeSummary,*
@@ -15,7 +20,7 @@
 
 *What is New:* 
 *New parameter periodtype*
-*Own icons for the toolbar, created by myself and as resource in the plug-in*
+*Own icons for the toolbar, created by myself*
 *TreeSummary*
 *Export as html*
 *Export as text - column delimiter is tab*
@@ -28,6 +33,17 @@ This plugin provides a custom form to display some special accounting informatio
 My decision was to create a custom form to have the full control over the functionality
 
 and to extend the functionality step by step.
+
+
+** Installation **
+
+1. Install the plug-in 
+
+2. In the sql-folder are two files to install in the db.
+
+ 2.1 pat_facource.sql -> Is the needed View.
+
+ 2.2 pat_accountcourse.sql -> The function for AccountCourse
  
   
 ** AccountCourse **
@@ -109,16 +125,6 @@ favorite spreadsheet program.
 In the accountview it is now possible to zoom to the document of the selected
 
 fact_acct. 
-
-
-** Installation **
-
-In the sql-folder are two files to install in the db.
-
-1. pat_facource.sql -> Is the needed View.
-
-2. pat_accountcourse.sql -> The function for AccountCourse
-
 
 
 ** Planed extensions **
