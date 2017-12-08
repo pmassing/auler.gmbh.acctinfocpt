@@ -727,7 +727,7 @@ public class PAT_WAcctInfCptForm
 		for(Component listhead : listboxResult.getHeads())
 			if(listhead instanceof ListHead)
 				for (Component listheader : ((Component)listhead).getChildren())				
-					if(listheader instanceof ListItem)
+					if(listheader instanceof ListHeader)
 						((ListHeader)listheader).setLabel("");
 
 	}
