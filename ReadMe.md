@@ -1,24 +1,24 @@
 # ReadMe #
 
-** Plugin-Name: AccountInfoCockpit for iDempiere **
+**Plugin-Name: AccountInfoCockpit for iDempiere**
 
-** Plug-in Version: 1.0**
+**Plug-in Version: 1.0**
 
-** Status: Testing **
+**Status: Testing**
 
-** Licence: GPLv2 **
+**Licence: GPLv2**
 
-** Author: Patric Maﬂing (Hans Auler GmbH), Germany, pmassing(at)aulerlichtkabel.de**
+**Author: Patric Maﬂing (Hans Auler GmbH), Germany, pmassing(at)aulerlichtkabel.de**
 
-** Date: 2017 **
+**Date: 2017**
 
-** Required environment: iDempiere with PostgreSQL-Database **
+**Required environment: iDempiere with PostgreSQL-Database**
 
 
-** This Plug-in is distributed in the hope that it will be useful, **
-** but WITHOUT ANY WARRANTY; without even the implied warranty of **
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the **
-** GNU General Public License for more details. **
+**This Plug-in is distributed in the hope that it will be useful,**
+**but WITHOUT ANY WARRANTY; without even the implied warranty of**
+**MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the**
+**GNU General Public License for more details.**
 
 *ToDo: german translation*
 
@@ -28,12 +28,19 @@
 
 
 *What is New:* 
+
 *New parameter periodtype*
+
 *Own icons for the toolbar, created by myself*
+
 *TreeSummary*
+
 *Export as html*
+
 *Export as text - column delimiter is tab*
+
 *Zoom functionality for the accountview result*
+
 
 
 ** Description **
