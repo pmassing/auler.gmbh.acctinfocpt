@@ -1,11 +1,17 @@
 # ReadMe #
 
 ** Plugin-Name: AccountInfoCockpit for iDempiere **
+
 ** Plug-in Version: 1.0**
+
 ** Status: Testing **
+
 ** Licence: GPLv2 **
-** Author: Patric Ma√üing (Hans Auler GmbH), Germany, pmassing(at)aulerlichtkabel.de**
+
+** Author: Patric Maﬂing (Hans Auler GmbH), Germany, pmassing(at)aulerlichtkabel.de**
+
 ** Date: 2017 **
+
 ** Required environment: iDempiere with PostgreSQL-Database **
 
 
@@ -15,8 +21,11 @@
 ** GNU General Public License for more details. **
 
 *ToDo: german translation*
+
 *ToDo: better performance and keep resources by using TreeSummary,*
+
 * target is always to get the result in seconds*
+
 
 *What is New:* 
 *New parameter periodtype*
