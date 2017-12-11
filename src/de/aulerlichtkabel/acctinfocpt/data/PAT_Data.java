@@ -1,35 +1,34 @@
 /******************************************************************************
- * Product: iDempiere ERP & CRM Smart Business Solution                       *
- * This program is free software; you can redistribute it and/or modify it    *
- * under the terms version 2 of the GNU General Public License as published   *
- * by the Free Software Foundation. This program is distributed in the hope   *
- * that it will be useful, but WITHOUT ANY WARRANTY; without even the implied *
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.           *
- * See the GNU General Public License for more details.                       *
+ * Plug-in AccountInfoCockpit for iDempiere ERP & CRM Smart Business Solution *
+ * Copyright (C) 2017  Patric Maßing (Hans Auler GmbH)                        *
+ *                                                                            *
+ * This plug-in is free software; you can redistribute it and/or modify       *
+ * it under the terms of the GNU General Public License as published by       *
+ * the Free Software Foundation; either version 2 of the License, or          *
+ * (at your option) any later version.                                        *
+ *                                                                            *
+ * This plug-in is distributed in the hope that it will be useful,            *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ * GNU General Public License for more details.                               *
+ *                                                                            *
  * You should have received a copy of the GNU General Public License along    *
- * with this program; if not, write to the Free Software Foundation, Inc.,    *
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.                     *
+ * with this plug-in; If not, see <http://www.gnu.org/licenses/>.             *
  *****************************************************************************/
-
-/**
- * Plugin AccountInfoCockpit
- * 
- * @author Patric Maßing (Hans Auler GmbH)
- * 2017
- * 
- *  
+ 
+ /**
+  * @author Patric Maßing (Hans Auler GmbH)
+  * 2017
  */
 
-package de.aulerlichtkabel.acctinfocpt.froms;
+
+package de.aulerlichtkabel.acctinfocpt.data;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,16 +42,20 @@ import org.compiere.model.MAcctSchema;
 import org.compiere.model.MElementValue;
 import org.compiere.model.MOrg;
 import org.compiere.model.MTable;
+import org.compiere.model.MTree;
+import org.compiere.model.MTreeNode;
+import org.compiere.model.MTree_Base;
 import org.compiere.model.Query;
 import org.compiere.util.CLogger;
 import org.compiere.util.DB;
-import org.compiere.util.DisplayType;
 import org.compiere.util.Env;
 import org.compiere.util.KeyNamePair;
 import org.compiere.util.ValueNamePair;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zul.Label;
+
+import de.aulerlichtkabel.acctinfocpt.froms.PAT_WAcctInfCptForm;
 
 public class PAT_Data {
 
@@ -66,6 +69,8 @@ public class PAT_Data {
 	private BigDecimal credit = new BigDecimal("0");
 	private BigDecimal balance = new BigDecimal("0");
 
+	private PAT_Sqls sqls = new PAT_Sqls();
+	
 	/** Logger */
 	public static CLogger log = CLogger.getCLogger(PAT_WAcctInfCptForm.class);
 
@@ -192,7 +197,6 @@ public class PAT_Data {
 		List<MOrg> list = new Query(Env.getCtx(), MOrg.Table_Name, "AD_Client_ID=?", null)
 				.setParameters(Env.getAD_Client_ID(Env.getCtx())).setOrderBy(MOrg.COLUMNNAME_Name).list();
 
-		// TODO:Check of null
 		return list.toArray(new MOrg[list.size()]);
 
 	}
@@ -207,22 +211,17 @@ public class PAT_Data {
 
 		List<List<Object>> rows = new ArrayList<List<Object>>();
 
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM,
-				Env.getLanguage(Env.getCtx()).getLocale());
-
-		DecimalFormat numberFormat = DisplayType.getNumberFormat(DisplayType.Amount);
-
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 
 		try {
 
 			StringBuilder sqlApx = new StringBuilder();
-
-			sqlApx.append("");
+			
+			sqlApx.append(" 1 = 1 ");
 
 			if (params.get("product_id") != null) {
-
+				
 				sqlApx.append(" and m_product_id = ? ");
 			}
 
@@ -241,11 +240,34 @@ public class PAT_Data {
 				sqlApx.append(" and c_project_id = ? ");
 			}
 
-			sql.insert(sql.indexOf("group by", 0), sqlApx);
+			sqlApx.append(" and ");
+			
+			sql.insert(sql.indexOf(" where ")+6, sqlApx);
 
 			pstmt = DB.prepareStatement(sql.toString(), null);
 			// System.out.println(sql);
+
 			int idx = 1;
+
+			if (params.get("product_id") != null) {
+				pstmt.setInt(idx, (Integer) params.get("product_id"));
+				idx++;
+			}
+
+			if (params.get("bpartner_id") != null) {
+				pstmt.setInt(idx, (Integer) params.get("bpartner_id"));
+				idx++;
+			}
+
+			if (params.get("salesregion_id") != null) {
+				pstmt.setInt(idx, (Integer) params.get("salesregion_id"));
+				idx++;
+			}
+
+			if (params.get("project_id") != null) {
+				pstmt.setInt(idx, (Integer) params.get("project_id"));
+				idx++;
+			}
 
 			if (!((String) params.get("valueFrom")).equals("")) {
 				pstmt.setString(idx, (String) params.get("valueFrom"));
@@ -297,24 +319,6 @@ public class PAT_Data {
 				idx++;
 			}
 
-			if (params.get("product_id") != null) {
-				pstmt.setInt(idx, (Integer) params.get("product_id"));
-				idx++;
-			}
-
-			if (params.get("bpartner_id") != null) {
-				pstmt.setInt(idx, (Integer) params.get("bpartner_id"));
-				idx++;
-			}
-
-			if (params.get("salesregion_id") != null) {
-				pstmt.setInt(idx, (Integer) params.get("salesregion_id"));
-				idx++;
-			}
-
-			if (params.get("project_id") != null) {
-				pstmt.setInt(idx, (Integer) params.get("project_id"));
-			}
 
 			rs = pstmt.executeQuery();
 			
@@ -350,10 +354,10 @@ public class PAT_Data {
 				if (rs.getObject(9) != null){
 					
 					if (rs.getObject(9) instanceof Timestamp)
-						row.add(dateFormat.format(rs.getTimestamp(9)));
+						row.add(rs.getTimestamp(9));
 				
 					if (rs.getObject(9) instanceof BigDecimal)
-						row.add(numberFormat.format(rs.getBigDecimal(9)));
+						row.add(rs.getBigDecimal(9));
 
 				}
 				else
@@ -362,21 +366,21 @@ public class PAT_Data {
  				
 				// Debit
 				if (rs.getBigDecimal(10) != null){
-					row.add(numberFormat.format(rs.getBigDecimal(10)));
+					row.add(rs.getBigDecimal(10));
 					debit=debit.add(rs.getBigDecimal(10));
 				}
 				else
 					row.add("");
 				// Credit
 				if (rs.getBigDecimal(11) != null){
-					row.add(numberFormat.format(rs.getBigDecimal(11)));
+					row.add(rs.getBigDecimal(11));
 					credit=credit.add(rs.getBigDecimal(11));
 				}
 				else
 					row.add("");
 				// Balance
 				if (rs.getBigDecimal(12) != null){
-					row.add(numberFormat.format(rs.getBigDecimal(12)));
+					row.add(rs.getBigDecimal(12));
 					balance=balance.add(rs.getBigDecimal(12));
 				}
 				
@@ -419,6 +423,9 @@ public class PAT_Data {
 				else
 					row.add("");
 
+				// Record_ID
+				row.add(rs.getInt(21));
+				
 				rows.add(row);
 			}
 
@@ -447,5 +454,76 @@ public class PAT_Data {
 	public BigDecimal getBalance(){
 		
 		return balance;
+	}
+	
+	
+	public MTreeNode getTreeSummary(){
+		
+		MTree_Base treebase = new Query(Env.getCtx(),MTree.Table_Name, MTree.COLUMNNAME_TreeType+ " ='EV'", null).setClient_ID().first();
+
+        MTree AccountTree = new MTree(Env.getCtx(), treebase.getAD_Tree_ID(), false, true, null);        
+
+        return AccountTree.getRoot();
+	
 	}	
+	
+	public List<Object> getAccountsListWhereClause(){		
+		
+		List<Object> valueList = DB.getSQLValueObjectsEx(null, sqls.getSQLAccountIDsInFactAcct().toString());
+		
+		return valueList;
+		
+	}
+	
+	public String acctListshorten(String list){
+		
+		for(Object accountid : getAccountsListWhereClause())
+		if(!list.contains(String.valueOf(accountid)))
+			list.replaceAll("OR Account_ID="+accountid, "");
+		
+		return list;
+	}	
+	
+	public void exportAsHtml(String title, List<String> contentHeader, List<List<Object>> rows){
+				
+		PAT_ExportAsHtml exportHtml = new PAT_ExportAsHtml();
+		
+		StringBuilder htmlContent = new StringBuilder();
+
+		exportHtml.setTitle(title);
+		
+		
+		htmlContent.append(exportHtml.createHTMLHead());
+		
+		//ColumnHead
+		
+		StringBuilder tableContent = new StringBuilder();
+	
+		tableContent.append(exportHtml.createTable(exportHtml.createTableHeadColumns(contentHeader)+exportHtml.createTableRows(rows)));
+				
+
+		
+		htmlContent.append(exportHtml.createHTMLBody("",tableContent.toString() , ""));		
+
+		
+		
+		exportHtml.downloadHtmlFile(title, htmlContent.toString());
+		
+	}
+	
+	
+	public void exportAsTxt(String title, List<String> contentHeader, List<List<Object>> rows){
+		
+		PAT_ExportAsText exportText = new PAT_ExportAsText();
+		
+		StringBuilder textContent = new StringBuilder();
+
+		exportText.setTitle(title);
+							
+		textContent.append(exportText.createContent(exportText.createHeadColumns(contentHeader)+exportText.createTableRows(rows)));
+				
+		exportText.downloadTxtFile(title, textContent.toString());
+		
+	}
+	
 }

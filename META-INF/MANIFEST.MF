@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: AccountinfoCockpit
-Bundle-SymbolicName: de.aulerlichtkabel.acctinfocpt
+Bundle-SymbolicName: de.aulerlichtkabel.acctinfocpt;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-Activator: org.adempiere.plugin.utils.Incremental2PackActivator
@@ -17,3 +17,4 @@ Import-Package: org.compiere.model,
  org.zkoss.zul,
  org.zkoss.zul.impl
 Bundle-Vendor: Patric Maßing (Hans Auler GmbH)
+Bundle-ActivationPolicy: lazy
