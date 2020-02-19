@@ -101,7 +101,7 @@ public class PAT_Data {
 		docID = 0;
 		docTableName.delete(0, docTableName.length());
 
-		final MTable table = new MTable(Env.getCtx(), new Integer((String)box.getSelectedItem().getValue()), null);
+		final MTable table = new MTable(Env.getCtx(), Integer.valueOf((String)box.getSelectedItem().getValue()), null);
 
 		hasDocnoCol = false;
 		if(table.getColumn("DocumentNo") != null)
