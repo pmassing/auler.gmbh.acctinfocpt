@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: AccountinfoCockpit
-Bundle-SymbolicName: de.aulerlichtkabel.acctinfocpt;singleton:=true
+Bundle-SymbolicName: auler.gmbh.acctinfocpt;singleton:=true
 Bundle-Version: 6.2.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Activator: org.adempiere.plugin.utils.Incremental2PackActivator

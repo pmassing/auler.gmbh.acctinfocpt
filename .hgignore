@@ -2,4 +2,4 @@ syntax: glob
 
 .settings
 bin
-
+target
