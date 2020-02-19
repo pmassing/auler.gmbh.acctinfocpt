@@ -8,11 +8,11 @@
 
 **Licence: GPLv2**
 
-**Author: Patric Maßing (Hans Auler GmbH), Germany, pmassing(at)aulerlichtkabel.de**
+**Author: Patric Maßing (Hans Auler GmbH), Germany, p.massing(at)auler.gmbh**
 
 **Date: 2017**
 
-**Required environment: iDempiere with PostgreSQL-Database**
+**Required environment: iDempiere 7.1 with PostgreSQL-Database**
 
 
 **This Plug-in is distributed in the hope that it will be useful,**
@@ -53,15 +53,8 @@ and to extend the functionality step by step.
 
 ** Installation **
 
-1. Install the plug-in 
+1. Install the plug-in with your osgi console
 
-2. In the sql-folder are two files to install in the db.
-
- 2.1 pat_facource.sql -> Is the needed View.
-
- 2.2 pat_accountcourse.sql -> The function for AccountCourse
- 
-  
 ** AccountCourse **
 Shows the current balance up to date at this line for the defined Account in the
 
